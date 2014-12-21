@@ -26,6 +26,7 @@ module.exports = (models, store, routes, config, log) ->
     .use body-parser.urlencoded extended: true
     .use session
     .use user-id
+    .use routes models, store, config
 
 user-id = (req, res, next) ->
   req.session.user-id ?= uuid.v4!
