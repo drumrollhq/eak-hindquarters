@@ -29,7 +29,10 @@ module.exports = (models, store, routes, config, log) ->
     .use routes models, store, config
 
 user-id = (req, res, next) ->
-  req.session.user-id ?= uuid.v4!
+  unless req.session.device-id?
+    req.session.device-id = uuid.v4!
+    req.log.debug req.session.{device-id} "Created device-id"
+
   next!
 
 request-logger = (log) -> (req, res, next) ->
@@ -47,9 +50,9 @@ request-logger = (log) -> (req, res, next) ->
     content-length = res._headers?.'content-length'
     method = req.method
     url = req.url
-    user = req.session.user-id
+    device-id = req.session.device-id
     remote-address = req._remote-address
-    req.log.info {ms, status, content-length, method, url, user, remote-address},
+    req.log.info {ms, status, content-length, method, url, device-id, remote-address},
       "#{req.method} #{req.url} -> #status [#{format-length content-length}] #{ms.to-fixed 2}ms"
 
   res.on 'close' logger
