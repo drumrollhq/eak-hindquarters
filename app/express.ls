@@ -1,13 +1,35 @@
 require! {
+  'body-parser'
+  'compression'
+  'cookie-parser'
+  'cookie-session'
   'express'
+  'express-cors'
   'node-uuid': uuid
 }
 
 module.exports = (models, store, routes, config, log) ->
   log = log.create 'app'
-  app = express!
 
-  app.use request-logger log
+  session = cookie-session {
+    keys: [config.SECURE_COOKIE_1, config.SECURE_COOKIE_2]
+    name: config.SESSION_NAME
+    maxage: config.SESSION_MAXAGE
+  }
+
+  app = express!
+    .use request-logger log
+    .use express-cors allowed-origins: ['localhost:*' '*.eraseallkittens.com' '*.drumrollhq.com']
+    .use compression!
+    .use cookie-parser!
+    .use body-parser.json!
+    .use body-parser.urlencoded extended: true
+    .use session
+    .use user-id
+
+user-id = (req, res, next) ->
+  req.session.user-id ?= uuid.v4!
+  next!
 
 request-logger = (log) -> (req, res, next) ->
   req._start-at = process.hrtime!
@@ -24,7 +46,9 @@ request-logger = (log) -> (req, res, next) ->
     content-length = res._headers?.'content-length'
     method = req.method
     url = req.url
-    req.log.info {ms, status, content-length, method, url},
+    user = req.session.user-id
+    remote-address = req._remote-address
+    req.log.info {ms, status, content-length, method, url, user, remote-address},
       "#{req.method} #{req.url} -> #status [#{format-length content-length}] #{ms.to-fixed 2}ms"
 
   res.on 'close' logger
