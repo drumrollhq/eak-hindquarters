@@ -1,16 +1,17 @@
 require! {
   '../config'
+  './aggregate'
+  './express'
   './log'
   './models'
   './routes'
   './store'
-  './express'
   'http'
 }
 
 models.setup!
-  .then ->
-    store.setup!
+  .then -> store.setup!
+  .then -> aggregate.setup store
   .then ->
     app = express models, store, routes, config, log
     server = http.create-server app
