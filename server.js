@@ -1,2 +1,2 @@
 require('LiveScript');
-require('./app');
+require('./app').start();
