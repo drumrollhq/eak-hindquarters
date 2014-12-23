@@ -33,8 +33,12 @@ module.exports = (models, store, routes, config, log) ->
 express-promise = (req, res, next) ->
   res.promise = (p) ->
     p
-      .then (value) -> res.json value
-      .catch (e) -> error-handler e, req, res
+      .then (value) ->
+        req.log.debug 'express-promise: resolve'
+        res.json value
+      .catch (e) ->
+        req.log.debug 'express-promise: reject'
+        error-handler e, req, res
 
   next!
 
@@ -48,7 +52,7 @@ user-id = (req, res, next) ->
   next!
 
 error-handler = (err, req, res, next) ->
-  console.log 'ERROR HANDLER' req
+  req.log.debug 'error-handler' err, err.stack
   if req._errd then return
   req._errd = true
   if err.status?
@@ -72,15 +76,15 @@ request-logger = (log) -> (req, res, next) ->
     content-length = res._headers?.'content-length'
     method = req.method
     url = req.original-url or req.url
-    device-id = req.session.device-id
+    device-id = req.session?.device-id
     remote-address = req._remote-address
     req.log.info {ms, status, content-length, method, url, device-id, remote-address},
-      "#{req.method} #{req.url} -> #status [#{format-length content-length}] #{ms.to-fixed 2}ms"
+      "#{method} #{url} -> #status [#{format-length content-length}] #{ms.to-fixed 2}ms"
 
   res.on 'close' logger
   res.on 'finish' logger
 
-  req.log.trace "Start request #{req.method} #{req.url}"
+  req.log.debug "Start request #{req.method} #{req.url}"
 
   next!
 

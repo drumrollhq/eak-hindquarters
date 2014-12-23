@@ -12,7 +12,6 @@ module.exports = (models, store, config) ->
     res.promise sessions.create req.session.device-id, req.session.user-id, req.body
 
   app.post '/:sessionId', (req, res) ->
-    console.log req.session
     res.promise sessions.checkin req.params.session-id, req.session.device-id, req.body
 
   app.delete '/:sessionId', (req, res) ->
