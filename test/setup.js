@@ -6,20 +6,23 @@ var config = require('../config'),
   models = require('../app/models'),
   store = require('../app/store'),
   Mocha = require('mocha'),
-  supertest = require('supertest'),
-  expect = require('chai').expect,
+  chai = require('chai'),
+  sinon = require('sinon'),
+  sinonChai = require('sinon-chai'),
+  bluebird = require('bluebird')
   glob = require('glob');
 
-var api = supertest('http://localhost:' + config.PORT);
-global.api = api;
-global.expect = expect;
+chai.use(sinonChai);
+global.expect = chai.expect;
+global.sinon = sinon;
 global.store = store;
 global.models = models;
 global.config = config;
+global.Promise = bluebird;
 
 var mocha = new Mocha({
   ui: 'bdd',
-  reporter: 'nyan'
+  reporter: config.MOCHA_REPORTER || 'nyan'
 });
 
 glob.sync(__dirname + '/**/*.ls').forEach(mocha.addFile.bind(mocha));

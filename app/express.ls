@@ -18,6 +18,7 @@ module.exports = (models, store, routes, config, log) ->
   }
 
   app = express!
+    .use express-promise
     .use request-logger log
     .use express-cors allowed-origins: ['localhost:*' '*.eraseallkittens.com' '*.drumrollhq.com']
     .use compression!
@@ -27,13 +28,34 @@ module.exports = (models, store, routes, config, log) ->
     .use session
     .use user-id
     .use routes models, store, config
+    .use error-handler
+
+express-promise = (req, res, next) ->
+  res.promise = (p) ->
+    p
+      .then (value) -> res.json value
+      .catch (e) -> error-handler e, req, res
+
+  next!
 
 user-id = (req, res, next) ->
   unless req.session.device-id?
     req.session.device-id = uuid.v4!
     req.log.debug req.session.{device-id} "Created device-id"
 
+  req.session.user-id ?= \GUEST
+
   next!
+
+error-handler = (err, req, res, next) ->
+  console.log 'ERROR HANDLER' req
+  if req._errd then return
+  req._errd = true
+  if err.status?
+    res.status err.status .json err
+  else
+    req.log.error 'Error handling request:', err
+    res.status 500 .json status: 500, reason: \unknown, details: err
 
 request-logger = (log) -> (req, res, next) ->
   req._start-at = process.hrtime!
@@ -49,7 +71,7 @@ request-logger = (log) -> (req, res, next) ->
     status = res.status-code
     content-length = res._headers?.'content-length'
     method = req.method
-    url = req.url
+    url = req.original-url or req.url
     device-id = req.session.device-id
     remote-address = req._remote-address
     req.log.info {ms, status, content-length, method, url, device-id, remote-address},

@@ -20,17 +20,21 @@
     "cookie-session": "^1.1.0",
     "express": "^4.10.6",
     "express-cors": "0.0.3",
+    "express-promise": "^0.4.0",
     "knex": "^0.7.3",
     "moment": "^2.8.4",
     "mongoskin": "^1.4.4",
     "node-uuid": "^1.4.2",
     "pg": "^4.1.1",
-    "prelude-ls": "^1.1.1"
+    "prelude-ls": "^1.1.1",
+    "supertest-as-promised": "^1.0.0"
   },
   "devDependencies": {
     "chai": "^1.10.0",
     "glob": "^4.3.2",
     "mocha": "^2.0.1",
+    "sinon": "^1.12.2",
+    "sinon-chai": "^2.6.0",
     "supertest": "^0.15.0"
   }
 }
