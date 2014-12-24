@@ -1,4 +1,5 @@
 require! {
+  'bluebird': Promise
   'body-parser'
   'compression'
   'cookie-parser'
@@ -21,7 +22,6 @@ module.exports = (models, store, routes, config, log) ->
     .use express-promise
     .use request-logger log
     .use express-cors allowed-origins: ['localhost:*' '*.eraseallkittens.com' '*.drumrollhq.com']
-    .use compression!
     .use cookie-parser!
     .use body-parser.json!
     .use body-parser.urlencoded extended: true
@@ -32,6 +32,7 @@ module.exports = (models, store, routes, config, log) ->
 
 express-promise = (req, res, next) ->
   res.promise = (p) ->
+    p = if typeof! p is 'Array' then Promise.all p else Promise.resolve p
     p
       .then (value) ->
         req.log.debug 'express-promise: resolve'
@@ -59,7 +60,7 @@ error-handler = (err, req, res, next) ->
     res.status err.status .json err
   else
     req.log.error 'Error handling request:', err
-    res.status 500 .json status: 500, reason: \unknown, details: err
+    res.status 500 .json status: 500, reason: \unknown, details: err.message or err
 
 request-logger = (log) -> (req, res, next) ->
   req._start-at = process.hrtime!

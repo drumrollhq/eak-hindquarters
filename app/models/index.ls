@@ -5,6 +5,7 @@ require! {
   'acl-knex': AclKnexBackend
   'assert'
   'bluebird'
+  'bookshelf'
   'knex'
   'path'
 }
@@ -25,6 +26,8 @@ db = knex {
   debug: config.DEBUG_SQL
 }
 
+orm = bookshelf db
+
 log = log.create 'db'
 
 module.exports = models = {
@@ -41,6 +44,13 @@ module.exports = models = {
         backend = new AclKnexBackend db, 'acl_'
         bluebird.promisify-all Acl.prototype
         models.acl = new Acl backend
+        create-models!
 
   db: db
+  orm: orm
 }
+
+create-models = ->
+  model-names = <[User]>
+  for name in model-names
+    models[name] = (require "./#{name}")(orm, db)
