@@ -16,6 +16,7 @@ module.exports = (orm, db) ->
     id-attribute: 'id'
   }, {
     username: -> "#{capitalize random adjectives}#{capitalize random nouns}#{Math.floor 100 * Math.random!}"
+
     unused-username: ->
       username = User.username!
       User.exists username

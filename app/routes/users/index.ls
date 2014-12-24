@@ -13,7 +13,11 @@ module.exports = (models, store, config) ->
     fn = if req.query.unused then User.unused-username else User.username
     res.promise [fn! for i from 1 to n]
 
+  app.get '/register' (req, res) ->
+    res.promise-render 'users/register'
+
   app.get '/:username/exists' (req, res) ->
     username = req.params.username
     if username.match /^[0-9]*$/ then id = parse-int username
     res.promise User.exists (id or username)
+

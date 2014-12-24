@@ -1,5 +1,5 @@
 module.exports = {
-  DEBUG_SQL: true
+  # DEBUG_SQL: true
   DB_HOST: 'localhost'
   DB_PW: 'hindquarters'
   LOG_STDOUT: 'debug'

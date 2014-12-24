@@ -7,6 +7,7 @@ require! {
   'express'
   'express-cors'
   'node-uuid': uuid
+  './templates/views'
 }
 
 module.exports = (models, store, routes, config, log) ->
@@ -22,6 +23,8 @@ module.exports = (models, store, routes, config, log) ->
     .use express-promise
     .use request-logger log
     .use express-cors allowed-origins: ['localhost:*' '*.eraseallkittens.com' '*.drumrollhq.com']
+    .use compression!
+    .use express.static __dirname + '/../public'
     .use cookie-parser!
     .use body-parser.json!
     .use body-parser.urlencoded extended: true
@@ -40,6 +43,9 @@ express-promise = (req, res, next) ->
       .catch (e) ->
         req.log.debug 'express-promise: reject'
         error-handler e, req, res
+
+  res.promise-render = (view-name, data = {}) ->
+    views[view-name].stream data .pipe res
 
   next!
 
@@ -80,7 +86,7 @@ request-logger = (log) -> (req, res, next) ->
     device-id = req.session?.device-id
     remote-address = req._remote-address
     req.log.info {ms, status, content-length, method, url, device-id, remote-address},
-      "#{method} #{url} -> #status [#{format-length content-length}] #{ms.to-fixed 2}ms"
+      "#{method} #{url} -> #status [#{if content-length then format-length content-length else 'streaming'}] #{ms.to-fixed 2}ms"
 
   res.on 'close' logger
   res.on 'finish' logger
