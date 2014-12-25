@@ -1,5 +1,5 @@
 exports.up = (knex, Promise) ->
-  knex.schema.create-table 'users' (table) ->
+  knex.schema.create-table 'user' (table) ->
     table.increments 'id' .index!
     table.enum 'status' <[pending active deactivated]>
     table.string 'username' .index! .unique!
@@ -14,4 +14,4 @@ exports.up = (knex, Promise) ->
     table.timestamps!
 
 exports.down = (knex, Promise) ->
-  knex.schema.drop-table 'accounts'
+  knex.schema.drop-table 'user'

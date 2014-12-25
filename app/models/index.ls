@@ -1,6 +1,7 @@
 require! {
   '../../config'
   '../log'
+  './BaseModel'
   'acl': Acl
   'acl-knex': AclKnexBackend
   'assert'
@@ -51,6 +52,7 @@ module.exports = models = {
 }
 
 create-models = ->
-  model-names = <[User]>
+  model-names = <[User OAuth]>
+  base = BaseModel orm, db, models
   for name in model-names
-    models[name] = (require "./#{name}")(orm, db)
+    models[name] = (require "./#{name}")(orm, db, models, base)

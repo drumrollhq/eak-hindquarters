@@ -7,6 +7,7 @@ require! {
   'express'
   'express-cors'
   'node-uuid': uuid
+  'passport'
   './templates/views'
 }
 
@@ -29,6 +30,8 @@ module.exports = (models, store, routes, config, log) ->
     .use body-parser.json!
     .use body-parser.urlencoded extended: true
     .use session
+    .use passport.initialize!
+    .use passport.session!
     .use user-id
     .use routes models, store, config
     .use error-handler
