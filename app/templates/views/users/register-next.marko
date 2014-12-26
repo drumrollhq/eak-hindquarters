@@ -1,0 +1,120 @@
+<layout-use template="../layout.marko" show-header="$true">
+  <layout-put into="title">Sign Up</layout-put>
+  <layout-put into="body">
+    <h3 if="data.manual">Surprise! Have some more bits to fill out:</h3>
+    <h3 else>Yay! Forms for everyone!</h3>
+    <async-fragment data-provider="data.savedUser" var="savedUser"><async-fragment data-provider="data.user" var="user">
+      <form method="POST" action="/v1/auth/register/complete">
+        <div class="two-up">
+          <div>
+            <div class="usernames">
+              <label class="text-field">
+                <h4>Pick a username:</h4>
+                <async-fragment data-provider="data.username" var="username">
+                  <input type="text" name="username" value="$username" placeholder="e.g. $username">
+                </async-fragment>
+              </label>
+              <h4>Or, use one of these:</h4>
+              <ul class="button-list button-list-little">
+                <async-fragment data-provider="data.usernames" var="usernames">
+                  <li for="username in usernames"><button type="button">$username</button></li>
+                </async-fragment>
+                <li><button type="button" class="more">Get more...</button></li>
+              </ul>
+            </div>
+            <with vars="savedPassword = savedUser.get('passwordDigest')">
+              <div if="data.password && !savedPassword" class="password clear">
+                <label class="text-field">
+                  <h4>Choose a password:</h4>
+                  <input type="password" name="password">
+                </label>
+                <label class="text-field">
+                  <h4>Confirm the password! Quick!</h4>
+                  <input type="password" name="passwordConfirm">
+                </label>
+              </div>
+            </with>
+          </div>
+          <div>
+            <with vars="savedEmail = savedUser.get('email'); email = user.get('email');">
+              <label if="!savedEmail" class="text-field">
+                <h4 if="savedUser.adult()">Please enter your email:</h4>
+                <h4 else>Please enter your parent's email:</h4>
+                <input type="text" name="email" value="$email" placeholder="e.g. tarquin@drumrollhq.com">
+                <span if="savedUser.adult()" class="little">We won't send you spam :)</span>
+                <span else class="little">We won't send them spam :)</span>
+              </label>
+            </with>
+            <with vars="savedGender = savedUser.get('gender'); gender = user.get('gender');">
+              <div if="!savedGender" class="radio-group">
+                <h4>Can I interest you in a gender?</h4>
+                <div class="radio-group-radios">
+                  <input id="gm" type="radio" name="gender" value="male" checked="${gender === 'male'}">
+                  <label for="gm">
+                    Boy!
+                  </label>
+                  <input id="gf" type="radio" name="gender" value="female" checked="${gender === 'female'}">
+                  <label for="gf">
+                    Girl!
+                  </label>
+                  <input id="gn" type="radio" name="gender" value="nope" checked="${gender === 'nope'}">
+                  <label for="gn">
+                    Nope!
+                  </label>
+                </div>
+              </div>
+            </with>
+            <with vars="subscribe = user.get('subscribedNewsletter')">
+              <div class="radio-group">
+              <h4>Would you like to recieve infrequent email updates about E.A.K?</h4>
+              <div class="radio-group-radios">
+                <input id="sy" type="radio" name="subscribedNewsletter" value="true" checked="${subscribe === true || subscribe == null}">
+                <label for="sy">Yes</label>
+                <input id="sn" type="radio" name="subscribedNewsletter" value="false" checked="${subscribe === false}">
+                <label for="sn">No</label>
+              </div>
+            </with>
+            <button type="submit" class="button-smaller">Finish</button>
+          </div>
+        </div>
+      </form>
+    </async-fragment></async-fragment>
+    <script>
+      function $(selector, ctx) {
+        return (document || ctx).querySelector(selector);
+      }
+
+      function $$(selector, ctx) {
+        return Array.prototype.slice.apply((document || ctx).querySelectorAll(selector));
+      }
+
+      function getJSON(url, cb) {
+        var xhr = new XMLHttpRequest();
+        xhr.open('get', url);
+        xhr.addEventListener('load', function() {
+          cb(JSON.parse(xhr.responseText));
+        }, false);
+        xhr.send();
+      }
+
+      var usernameArea = $('.usernames .button-list'),
+        form = $('form'),
+        buttons = $$('button:not(.more)', usernameArea);
+
+      usernameArea.addEventListener('click', function(e) {
+        var target = e.target;
+        if (e.target.tagName.toLowerCase() === 'button') {
+          if (target.classList.contains('more')) {
+            getJSON('/v1/users/usernames?unused=true&amp;n=' + buttons.length, function(usernames) {
+              buttons.forEach(function(el, i) {
+                el.innerHTML = usernames[i];
+              });
+            });
+          } else {
+            form.username.value = target.innerHTML;
+          }
+        }
+      }, false);
+    </script>
+  </layout-put>
+</layout-use>

@@ -15,13 +15,14 @@ module.exports = (orm, db, models, BaseModel) ->
     has-timestamps: true
     table-name: 'user'
     id-attribute: 'id'
-    format: (attrs) ->
-      attrs = super attrs
-      attrs.email .= trim!.to-lower-case! if attrs.email?
-      attrs.username .= trim!.to-lower-case! if attrs.username?
-      attrs
+
+    formatters:
+      trim: <[email username first_name last_name]>
+      lower: <[email username]>
 
     oauths: -> @has-many models.OAuth
+
+    adult: -> @get 'assumeAdult'
 
     @username = -> "#{capitalize random adjectives}#{capitalize random nouns}#{Math.floor 100 * Math.random!}"
 
@@ -43,7 +44,7 @@ module.exports = (orm, db, models, BaseModel) ->
 
     @exists = (user-id) ->
       db.first 'id'
-        .from User.table-name
+        .from User::table-name
         .where User.get-id-spec user-id
         .then (row) -> exists: !!row
 

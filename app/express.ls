@@ -48,7 +48,9 @@ express-promise = (req, res, next) ->
         error-handler e, req, res
 
   res.promise-render = (view-name, data = {}) ->
-    views[view-name].stream data .pipe res
+    if views[view-name]?
+      views[view-name].stream data .pipe res
+    else next "Cannot find view #{view-name}. Available views: #{Object.keys views .join ', '}"
 
   next!
 
@@ -69,7 +71,7 @@ error-handler = (err, req, res, next) ->
     res.status err.status .json err
   else
     req.log.error 'Error handling request:', err
-    res.status 500 .json status: 500, reason: \unknown, details: err.message or err
+    res.status 500 .json status: 500, reason: \unknown, details: (err.message or err)
 
 request-logger = (log) -> (req, res, next) ->
   req._start-at = process.hrtime!

@@ -6,31 +6,97 @@
       <div>
         <h3>Social sign in excitement?!</h3>
         <ul class="sso">
-          <li><a href="/v1/auth/google" class="sso-button sso-button-google">
+          <li><a href="/v1/auth/google?redirect=/v1/auth/register/oauth" class="sso-button sso-button-google">
             Sign up with <strong>Google</strong>
           </a></li>
-          <li><a href="/v1/auth/facebook" class="sso-button sso-button-facebook">
+          <li><a href="/v1/auth/facebook?redirect=/v1/auth/register/oauth" class="sso-button sso-button-facebook">
             Sign up with <strong>Facebook</strong>
           </a></li>
         </ul>
       </div>
       <div>
-        <h3>Or, these crazy text fields!?</h3>
+        <h3>Or, these crazy text fields!? <span class="sub">Real talk: they're mostly not text fields</span></h3>
         <form method="POST" url="/v1/users/register">
-          <label>
-            <h4>First Name</h4>
+          <div class="feedback-area"></div>
+          <label class="text-field">
+            <h4>What's your first name?</h4>
             <input type="text" name="firstName" placeholder="e.g. Tarquin">
           </label>
-          <label>
-            <h4>Age</h4>
-            <input type="number" name="age">
-          </label>
-          <label>
-            <h4>Gender</h4>
-            <input type="text" name="gender" placeholder="e.g. Brocolli">
-          </label>
+          <div class="radio-group">
+            <h4>Are you aged 13 or over?</h4>
+            <div class="radio-group-radios">
+              <input id="ay" type="radio" name="overThirteen" value="true">
+              <label for="ay">Yes</label>
+              <input id="an" type="radio" name="overThirteen" value="false">
+              <label for="an">No</label>
+            </div>
+          </div>
+          <button type="submit" class="button-smaller">Onwards!</button>
+          <!-- <div class="radio-group">
+            <h4>Can I interest you in a gender?</h4>
+            <div class="radio-group-radios">
+              <input id="gm" type="radio" name="gender" value="male">
+              <label for="gm">
+                Boy!
+              </label>
+              <input id="gf" type="radio" name="gender" value="female">
+              <label for="gf">
+                Girl!
+              </label>
+              <input id="gn" type="radio" name="gender" value="nope">
+              <label for="gn">
+                Nope!
+              </label>
+            </div>
+          </div> -->
         </form>
       </div>
     </div>
+    <script>
+      function $(selector, ctx) {
+        return (ctx || document).querySelector(selector);
+      }
+
+      function $$(selector, ctx) {
+        return Array.prototype.slice.apply((ctx || document).querySelectorAll(selector));
+      }
+
+      function hideFeedback() {
+        form.classList.remove('has-errors');
+        $$('form .has-error').forEach(function(el) {
+          el.classList.remove('has-error');
+        });
+      }
+
+      function showFeedback(msg, el) {
+        form.classList.add('has-errors');
+        feedbackArea.innerHTML = msg;
+        if (el) el.classList.add('has-error');
+      }
+
+      var form = $('form'),
+        feedbackArea = $('.feedback-area');
+
+      $('button').addEventListener('submit', function(e) {
+        var name = form.firstName.value.trim(),
+          overThirteen = form.overThirteen.value;
+
+        hideFeedback();
+
+        if (!name) {
+          showFeedback('Please enter your name!', form.firstName.labels[0]);
+          e.preventDefault();
+          return false;
+        }
+
+        if (!overThirteen) {
+          showFeedback('You need to say if you\'re over thirteen!', $('h4', form.overThirteen[0].parentNode.parentNode));
+          e.preventDefault();
+          return false;
+        }
+
+        return true;
+      }, false);
+    </script>
   </layout-put>
 </layout-use>

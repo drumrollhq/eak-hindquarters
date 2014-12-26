@@ -1,7 +1,7 @@
 exports.up = (knex, Promise) ->
   knex.schema.create-table 'user' (table) ->
     table.increments 'id' .index!
-    table.enum 'status' <[pending active deactivated]>
+    table.enum 'status' <[creating pending active deactivated]>
     table.string 'username' .index! .unique!
     table.string 'email' .index! .unique!
     table.string 'password_digest'

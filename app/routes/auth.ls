@@ -1,4 +1,5 @@
 require! {
+  'bluebird': Promise
   'express'
   'passport'
   'passport-google-oauth'
@@ -16,7 +17,7 @@ auth-user = (models, provider, access-token, refresh-token, profile, done) -->
         user = oauth.related 'user'
       else
         oauth = new OAuth {provider: provider, provider-id: profile.id}
-        user = new User!
+        user = new User status: 'creating'
 
       user.set {
         first-name: profile.given_name or profile.first_name
@@ -68,7 +69,7 @@ module.exports = (models, store, config) ->
     client-secret: config.FACEBOOK_CLIENT_SECRET
     callback-URL: "#{config.APP_ROOT}/v1/auth/facebook/callback"
     scope: ['public_profile' 'email']
-    profile-fields: <[id,first_name,last_name,email,gender]>
+    profile-fields: 'id,first_name,last_name,email,gender'
   }, auth-user models, 'facebook'
 
   passport.use google
@@ -80,6 +81,28 @@ module.exports = (models, store, config) ->
 
   app.get '/register' (req, res) ->
     res.promise-render 'users/register'
+
+  app.post '/register' (req, res, next) ->
+    user = new User firstName: req.body.firstName, assumeAdult: req.body.overThirteen, status: 'creating'
+      .save!
+      .then (user) ->
+        req.session.passport = user: user.id
+        res.redirect '/v1/auth/register/manual'
+      .catch (err) -> next err
+
+  register-next = (password, manual) -> (req, res) ->
+    user = req.user.fetch!
+    res.promise-render 'users/register-next' {
+      username: User.unused-username!
+      usernames: Promise.all [til 3].map -> User.unused-username!
+      saved-user: user
+      user: user
+      password: password
+      manual: manual
+    }
+
+  app.get '/register/manual' register-next true true
+  app.get '/register/oauth' register-next false false
 
   app.get '/google', set-oauth-redirect, passport.authenticate 'google'
   google-callback = passport.authenticate 'google', failure-redirect: '/v1/auth/register'

@@ -63,12 +63,32 @@ body, html {
   border-left: 1px solid #ccc;
 }
 
+.clear {
+  clear: both;
+  padding-top: 10px;
+}
+
 /* Typography */
 
 h3 {
   font-weight: 300;
   text-align: center;
   color: #555;
+}
+
+.sub {
+  display: block;
+  font-size: 0.7em;
+}
+
+h4 {
+  font-size: 16px;
+  font-weight: 300;
+  margin: 0;
+}
+
+.little {
+  font-size: 0.8em;
 }
 
 /* Common Header */
@@ -86,6 +106,117 @@ header h1 {
   line-height: 50px;
   text-align: center;
   font-weight: normal;
+}
+
+/* forms */
+form .feedback-area {
+  color: red;
+  display: none;
+}
+
+form.has-errors .feedback-area {
+  display: block;
+}
+
+form .has-error {
+  color: red;
+}
+
+.text-field, .radio-group {
+  display: block;
+  margin-bottom: 15px;
+}
+
+input, button {
+  display: block;
+  width: 100%;
+  height: 40px;
+  background-color: #DCD8F2;
+  border: none;
+  font-family: inherit;
+  font-size: 1em;
+  padding: 0 15px;
+}
+
+input[type=radio] {
+  display: none;
+}
+
+.radio-group-radios {
+  display: table;
+  table-layout: fixed;
+  width: 100%;
+  height: 40px;
+}
+
+.radio-group-radios > label {
+  display: table-cell;
+  height: 40px;
+  line-height: 40px;
+  padding: 0 10px;
+  background-color: #DCD8F2;
+  border-right: 1px solid white;
+  cursor: pointer;
+}
+
+.radio-group-radios > label::before {
+  font-family: icons, sans-serif;
+  display: inline-block;
+  width: 1.5em;
+  opacity: 0.3;
+  content: 'n';
+}
+
+.radio-group-radios > input:checked + label {
+  background-color: #A79AED;
+}
+
+.radio-group-radios > input:checked + label::before {
+  opacity: 0.5;
+  content: 'y';
+}
+
+.radio-group-radios > label:last-child {
+  border-right: none;
+}
+
+.button-smaller {
+  width: 50%;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+button, input[type=button] {
+  cursor: pointer;
+  margin-bottom: 15px;
+}
+
+button:hover, input[type=button]:hover {
+  background-color: #A79AED;
+}
+
+/* Button lists */
+.button-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.button-list button {
+  display: inline-block;
+  width: auto;
+}
+
+.button-list li {
+  float: left;
+}
+
+.button-list-little button {
+  font-size: 0.8em;
+  height: auto;
+  padding: 5px 10px;
+  margin-left: 5px;
+  margin-bottom: 5px;
 }
 
 /* Single Sign On buttons */
