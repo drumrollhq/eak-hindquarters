@@ -4,14 +4,21 @@
     <h3 if="data.manual">Surprise! Have some more bits to fill out:</h3>
     <h3 else>Yay! Forms for everyone!</h3>
     <async-fragment data-provider="data.savedUser" var="savedUser"><async-fragment data-provider="data.user" var="user">
-      <form method="POST" action="/v1/auth/register/complete">
+      <form method="POST" action="/v1/auth/register/complete" class="${data.err && 'has-errors'}">
+        <input type="hidden" if="data.password" name="hasPassword" value="true">
+        <input type="hidden" if="data.manual" name="hasManual" value="true">
+        <div class="feedback-area">
+          <ul if="data.err && data.err.errors">
+            <li for="(name,error) in data.err.errors">${error.message}</li>
+          </ul>
+        </div>
         <div class="two-up">
           <div>
             <div class="usernames">
               <label class="text-field">
                 <h4>Pick a username:</h4>
                 <async-fragment data-provider="data.username" var="username">
-                  <input type="text" name="username" value="$username" placeholder="e.g. $username">
+                  <input type="text" name="username" value="${user.get('username') || username}" placeholder="e.g. $username">
                 </async-fragment>
               </label>
               <h4>Or, use one of these:</h4>

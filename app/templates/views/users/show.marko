@@ -1,0 +1,8 @@
+<layout-use template="../layout.marko" show-header="$true">
+  <async-fragment data-provider="data.user" var="user">
+    <layout-put into="title">${user.get('username')}</layout-put>
+    <layout-put into="body">
+      <pre>${JSON.stringify(user.toJSON(), null, 2)}</pre>
+    </layout-put>
+  </async-fragment>
+</layout-use>

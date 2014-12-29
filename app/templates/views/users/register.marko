@@ -16,8 +16,8 @@
       </div>
       <div>
         <h3>Or, these crazy text fields!? <span class="sub">Real talk: they're mostly not text fields</span></h3>
-        <form method="POST" url="/v1/users/register">
-          <div class="feedback-area"></div>
+        <form method="POST" url="/v1/users/register" class="${data.err && 'has-errors'}">
+          <div class="feedback-area">$data.err</div>
           <label class="text-field">
             <h4>What's your first name?</h4>
             <input type="text" name="firstName" placeholder="e.g. Tarquin">
@@ -32,23 +32,6 @@
             </div>
           </div>
           <button type="submit" class="button-smaller">Onwards!</button>
-          <!-- <div class="radio-group">
-            <h4>Can I interest you in a gender?</h4>
-            <div class="radio-group-radios">
-              <input id="gm" type="radio" name="gender" value="male">
-              <label for="gm">
-                Boy!
-              </label>
-              <input id="gf" type="radio" name="gender" value="female">
-              <label for="gf">
-                Girl!
-              </label>
-              <input id="gn" type="radio" name="gender" value="nope">
-              <label for="gn">
-                Nope!
-              </label>
-            </div>
-          </div> -->
         </form>
       </div>
     </div>
@@ -77,7 +60,7 @@
       var form = $('form'),
         feedbackArea = $('.feedback-area');
 
-      $('button').addEventListener('submit', function(e) {
+      form.addEventListener('submit', function(e) {
         var name = form.firstName.value.trim(),
           overThirteen = form.overThirteen.value;
 

@@ -1,5 +1,6 @@
 require! {
   'bluebird': Promise
+  'checkit'
   'express'
   'passport'
   'passport-google-oauth'
@@ -25,6 +26,7 @@ auth-user = (models, provider, access-token, refresh-token, profile, done) -->
         email: profile.email
         gender: profile.gender
         assume-adult: true
+        verified-email: !!profile.email
       }
 
       user.save!
@@ -38,9 +40,6 @@ auth-user = (models, provider, access-token, refresh-token, profile, done) -->
     .then (user) -> done null, user
     .catch (err) -> done err
 
-auth-facebook = (models, access-token, refresh-token, profile, done) -->
-  console.log profile
-
 set-oauth-redirect = (req, res, next) ->
   if req.query.redirect?
     req.session.oauth-redirect = req.query.redirect
@@ -53,6 +52,10 @@ follow-oauth-redirect = (req, res) ->
     delete req.session.oauth-redirect
   else
     res.redirect '/v1/auth/register'
+
+filtered-import = (obj) ->
+  obj = {[key, value] for key, value of obj when value}
+  obj
 
 module.exports = (models, store, config) ->
   {User} = models
@@ -69,7 +72,7 @@ module.exports = (models, store, config) ->
     client-secret: config.FACEBOOK_CLIENT_SECRET
     callback-URL: "#{config.APP_ROOT}/v1/auth/facebook/callback"
     scope: ['public_profile' 'email']
-    profile-fields: 'id,first_name,last_name,email,gender'
+    profile-fields: <[id first_name last_name email gender age_range]>
   }, auth-user models, 'facebook'
 
   passport.use google
@@ -83,7 +86,13 @@ module.exports = (models, store, config) ->
     res.promise-render 'users/register'
 
   app.post '/register' (req, res, next) ->
-    user = new User firstName: req.body.firstName, assumeAdult: req.body.overThirteen, status: 'creating'
+    first-name = req.body.first-name
+    assume-adult = req.body.over-thirteen
+    unless first-name then err = 'You need to tell us your name!'
+    unless assume-adult then err ?= 'You need to say whether or not you\'re over thirteen!'
+    if err then return res.promise-render 'users/register', {err}
+
+    user = new User {first-name, assume-adult, status: 'creating'}
       .save!
       .then (user) ->
         req.session.passport = user: user.id
@@ -103,6 +112,25 @@ module.exports = (models, store, config) ->
 
   app.get '/register/manual' register-next true true
   app.get '/register/oauth' register-next false false
+
+  app.post '/register/complete' (req, res, next) ->
+    data = filtered-import req.body.{username, password, password-confirm, email, gender, subscribed-newsletter}
+    usernames = Promise.all [til 3].map -> User.unused-username!
+    {has-password, has-manual} = req.body
+    req.user
+      .fetch!
+      .then (saved-user) ->
+        user = saved-user.clone!.set data
+        username = User.unused-username!
+        user.validate role: (if has-password then <[full password]> else 'full')
+          .then ->
+            user
+              .set 'status' if user.get 'verifiedEmail' then 'active' else 'pending'
+              .save!
+              .then -> res.promise-render 'users/show', user: user
+          .catch checkit.Error, (err) ->
+            res.promise-render 'users/register-next' {username, usernames, saved-user, user, err, password: has-password, manual: has-manual}
+      .catch next
 
   app.get '/google', set-oauth-redirect, passport.authenticate 'google'
   google-callback = passport.authenticate 'google', failure-redirect: '/v1/auth/register'
