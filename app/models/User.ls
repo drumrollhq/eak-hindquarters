@@ -1,4 +1,5 @@
 require! {
+  '../errors'
   'bcrypt'
   'bluebird': Promise
   'fs'
@@ -64,6 +65,13 @@ module.exports = (orm, db, models, BaseModel) ->
 
     adult: -> @get 'assumeAdult'
 
+    to-safe-json: ->
+      user = @to-JSON!
+      safe = user.{id, status, username, email, first-name, last-name, gender, subscribed-newsletter, created-at, updated-at, assume-adult, verified-email}
+      safe.has-password = !!user.password-digest
+      safe.oauths = @related 'oauths' .to-JSON! .map (oauth) -> oauth.{provider, provider-id}
+      safe
+
     hash-password: ->
       pw = @get 'password'
       unless pw then return Promise.resolve @get 'passwordDigest'
@@ -73,6 +81,14 @@ module.exports = (orm, db, models, BaseModel) ->
       bcrypt.gen-salt-async 10
         .then (salt) -> bcrypt.hash-async pw, salt
         .tap (hash) ~> @set 'passwordDigest', hash
+
+    check-password: (pw = '') ->
+      if @get 'passwordDigest'
+        bcrypt.compare-async pw, that
+          .then (res) ->
+            unless res then errors.bad-request 'Incorrect password!'
+      else
+        errors.bad-request "Gosh darn it! We don't have a password for #{@get 'username'}. Did you sign up with google or facebook?"
 
     save: ->
       sup = super

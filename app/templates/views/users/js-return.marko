@@ -1,0 +1,22 @@
+<layout-use template="../layout.marko" show-header="$true">
+  <layout-put into="title">Loading...</layout-put>
+  <layout-put into="body">
+    <async-fragment data-provider="data.user" var="payload">
+      <script>
+        var data = JSON.parse(decodeURI("${encodeURI(JSON.stringify(payload))}"));
+        ['http://eraseallkittens.com',
+        'https://eraseallkittens.com',
+        'http://www.eraseallkittens.com',
+        'https://www.eraseallkittens.com',
+        'http://staging.eraseallkittens.com',
+        'https://staging.eraseallkittens.com',
+        'http://drumrollhq.com',
+        'https://drumrollhq.com',
+        'http://localhost:3000',
+        'http://localhost:4000'].forEach(function(origin) {
+          window.opener.postMessage(data, origin);
+        });
+      </script>
+    </async-fragment>
+  </layout-put>
+</layout-use>

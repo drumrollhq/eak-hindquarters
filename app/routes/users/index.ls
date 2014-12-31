@@ -14,8 +14,17 @@ module.exports = (models, store, config) ->
     fn = if req.query.unused then User.unused-username else User.username
     res.promise [fn! for i from 1 to n]
 
+  app.get '/me' (req, res) ->
+    if req.user?
+      resp = req.user
+        .fetch with-related: <[oauths]>, required: true
+        .then (user) -> {logged-in: true, user: user.to-safe-json!, device: req.session.device-id}
+      res.promise resp
+    else
+      res.json {logged-in: false, device: req.session.device-id}
+
+
   app.get '/:username/exists' (req, res) ->
     username = req.params.username
     if username.match /^[0-9]*$/ then id = parse-int username
     res.promise User.exists (id or username)
-

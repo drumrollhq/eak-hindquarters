@@ -1,4 +1,5 @@
 require! {
+  '../errors'
   'bluebird': Promise
   'checkit'
   'express'
@@ -139,3 +140,24 @@ module.exports = (models, store, config) ->
   app.get '/facebook', set-oauth-redirect, passport.authenticate 'facebook'
   facebook-callback = passport.authenticate 'facebook', failure-redirect: '/v1/auth/register'
   app.get '/facebook/callback', facebook-callback, follow-oauth-redirect
+
+  app.get '/js-return' (req, res) ->
+    res.promise-render 'users/js-return', {user: req.user.fetch!}
+
+  app.post '/login' (req, res) ->
+    result = User.find req.body.username
+      .fetch!
+      .tap (user) ->
+        if user is null
+          errors.not-found "Oh no! We don't seem to have a #{req.body.username}. Have you tried asking next door?"
+        else
+          user.check-password req.body.password
+      .then (user) ->
+        req.session.passport = user: user.id
+        {logged-in: true, user: user}
+
+    res.promise result
+
+  app.get '/logout' (req, res) ->
+    req.logout!
+    res.json success: true

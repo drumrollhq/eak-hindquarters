@@ -1,4 +1,5 @@
 require! {
+  './templates/views'
   'bluebird': Promise
   'body-parser'
   'compression'
@@ -8,7 +9,6 @@ require! {
   'express-cors'
   'node-uuid': uuid
   'passport'
-  './templates/views'
 }
 
 module.exports = (models, store, routes, config, log) ->
@@ -38,13 +38,14 @@ module.exports = (models, store, routes, config, log) ->
 
 express-promise = (req, res, next) ->
   res.promise = (p) ->
-    p = if typeof! p is 'Array' then Promise.all p else Promise.resolve p
+    p = if typeof! p is 'Array' then Promise.all p else p
     p
       .then (value) ->
         req.log.debug 'express-promise: resolve'
         res.json value
       .catch (e) ->
         req.log.debug 'express-promise: reject'
+        console.log 'rejecting. is-promise:' e
         error-handler e, req, res
 
   res.promise-render = (view-name, data = {}) ->
