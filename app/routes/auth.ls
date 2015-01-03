@@ -142,7 +142,9 @@ module.exports = (models, store, config) ->
   app.get '/facebook/callback', facebook-callback, follow-oauth-redirect
 
   app.get '/js-return' (req, res) ->
-    res.promise-render 'users/js-return', {user: req.user.fetch!}
+    res.promise-render 'users/js-return', {
+      user: req.user.fetch with-related: <[oauths]> .then (user) -> user.to-safe-json!
+    }
 
   app.post '/login' (req, res) ->
     result = User.find req.body.username
