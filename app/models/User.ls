@@ -94,7 +94,6 @@ module.exports = (orm, db, models, BaseModel) ->
       sup = super
       args = arguments
       @hash-password!
-        .tap ~> console.log @to-JSON!
         .then ~> sup.apply @, args
 
     @username = -> "#{capitalize random adjectives}#{capitalize random nouns}#{Math.floor 100 * Math.random!}"

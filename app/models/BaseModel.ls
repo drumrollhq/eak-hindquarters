@@ -1,6 +1,6 @@
 require! {
   'checkit'
-  'prelude-ls': {camelize, dasherize}
+  'prelude-ls': {camelize, dasherize, empty}
 }
 
 snakeify = (str) -> dasherize str .replace /-/g, '_'
@@ -15,11 +15,12 @@ module.exports = (orm, db, models) ->
   checkit.Validators.unique = (val, table, col, ...extras) ->
     val .= trim! if 'trim' in extras
     val .= to-lower-case! if 'lower' in extras
-    db.first 'id'
+    db.select 'id'
       .from table
       .where col, '=', val
-      .where 'id', '!=', @_target.id
-      .then (row) -> !row
+      .then (rows) ~>
+        if @_target?.id? then rows = rows.filter ({id}) ~> id isnt @_target.id
+        empty rows
 
   class BaseModel extends orm.Model
     initialize: ->

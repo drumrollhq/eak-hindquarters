@@ -6,6 +6,7 @@ require! {
   'passport'
   'passport-google-oauth'
   'passport-facebook'
+  'prelude-ls': {empty}
 }
 
 auth-user = (models, provider, access-token, refresh-token, profile, done) -->
@@ -86,7 +87,7 @@ module.exports = (models, store, config) ->
   app.get '/register' (req, res) ->
     res.promise-render 'users/register'
 
-  app.post '/register' (req, res, next) ->
+  app.post '/register/initial' (req, res, next) ->
     first-name = req.body.first-name
     assume-adult = req.body.over-thirteen
     unless first-name then err = 'You need to tell us your name!'
@@ -132,6 +133,29 @@ module.exports = (models, store, config) ->
           .catch checkit.Error, (err) ->
             res.promise-render 'users/register-next' {username, usernames, saved-user, user, err, password: has-password, manual: has-manual}
       .catch next
+
+  app.post '/register' (req, res, next) ->
+    data = filtered-import req.body.{id, first-name, assume-adult, username, password, password-confirm, email, gender, subscribed-newsletter}
+    if data.id? and data.id is req.user.id
+      user = req.user.fetch with-related: <[oauths]>
+        .then (user) -> user.set data
+    else
+      user = Promise.resolve User.forge data
+
+    result = user
+      .then (user) ->
+        user.validate role: if empty user.related 'oauths' then <[full password]> else \full
+          .then -> user
+      .then (user) ->
+        user
+          .set 'status' if user.get 'verifiedEmail' then 'active' else 'pending'
+          .save!
+      .then (user) ->
+        req.session.passport = user: user.id
+        user.to-safe-json!
+      .catch checkit.Error, (err) -> errors.checkit-error err
+
+    res.promise result
 
   app.get '/google', set-oauth-redirect, passport.authenticate 'google'
   google-callback = passport.authenticate 'google', failure-redirect: '/v1/auth/register'

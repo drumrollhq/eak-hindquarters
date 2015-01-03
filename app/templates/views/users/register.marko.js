@@ -35,7 +35,7 @@ module.exports = function create(__helpers) {
             "layout": _layout
           },
           function(out) {
-            out.w('<h3>What are you into?</h3><div class="two-up"><div><h3>Social sign in excitement?!</h3><ul class="sso"><li><a href="/v1/auth/google?redirect=/v1/auth/register/oauth" class="sso-button sso-button-google">Sign up with <strong>Google</strong></a></li><li><a href="/v1/auth/facebook?redirect=/v1/auth/register/oauth" class="sso-button sso-button-facebook">Sign up with <strong>Facebook</strong></a></li></ul></div><div><h3>Or, these crazy text fields!? <span class="sub">Real talk: they\'re mostly not text fields</span></h3><form method="POST" url="/v1/users/register"' +
+            out.w('<h3>What are you into?</h3><div class="two-up"><div><h3>Social sign in excitement?!</h3><ul class="sso"><li><a href="/v1/auth/google?redirect=/v1/auth/register/oauth" class="sso-button sso-button-google">Sign up with <strong>Google</strong></a></li><li><a href="/v1/auth/facebook?redirect=/v1/auth/register/oauth" class="sso-button sso-button-facebook">Sign up with <strong>Facebook</strong></a></li></ul></div><div><h3>Or, these crazy text fields!? <span class="sub">Real talk: they\'re mostly not text fields</span></h3><form method="POST" url="/v1/users/register/initial"' +
               attr("class", data.err && 'has-errors') +
               '><div class="feedback-area">' +
               escapeXml(data.err) +
