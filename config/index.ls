@@ -7,6 +7,12 @@ try
 catch e
   console.log 'Couldn\'t load config for node_env:' e
 
+# Overwrite with private credentials:
+try
+  config <<< require './credentials'
+catch e
+  # meh
+
 # Overwrite with config from the host env
 config <<< process.env
 
