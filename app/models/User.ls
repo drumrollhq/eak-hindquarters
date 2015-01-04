@@ -1,5 +1,6 @@
 require! {
   '../errors'
+  '../mail'
   'bcrypt'
   'bluebird': Promise
   'fs'
@@ -70,7 +71,24 @@ module.exports = (orm, db, models, BaseModel) ->
       safe = user.{id, status, username, email, first-name, last-name, gender, subscribed-newsletter, created-at, updated-at, assume-adult, verified-email}
       safe.has-password = !!user.password-digest
       safe.oauths = @related 'oauths' .to-JSON! .map (oauth) -> oauth.{provider, provider-id}
+      safe.name = @name!
       safe
+
+    to-mail-recipient: (type = 'to') -> {
+      email: @get 'email'
+      name: @name!
+      type: type
+    }
+
+    name: ->
+      {first-name, last-name, username} = @to-json!
+      switch
+      | first-name and last-name => "#first-name #last-name"
+      | first-name => first-name
+      | username => username
+      | otherwise => throw new Error "Cannot get name for user #{@id}: no first-name, last-name, or username"
+
+    mail-metadata: -> @to-json!.{id, username, gender}
 
     hash-password: ->
       pw = @get 'password'
@@ -95,6 +113,10 @@ module.exports = (orm, db, models, BaseModel) ->
       args = arguments
       @hash-password!
         .then ~> sup.apply @, args
+
+    send-mail: (template-name, data) ->
+      console.log {template-name, data}
+      mail.send template-name, this, data
 
     @username = -> "#{capitalize random adjectives}#{capitalize random nouns}#{Math.floor 100 * Math.random!}"
 

@@ -50,3 +50,5 @@ module.exports = (orm, db, models) ->
       attrs = @attributes
       for name, type of @cast
         attrs[name] = cast type, attrs[name]
+
+    to-json: -> @to-JSON!
