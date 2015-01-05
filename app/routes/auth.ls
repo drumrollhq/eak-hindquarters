@@ -60,7 +60,7 @@ filtered-import = (obj) ->
   obj
 
 module.exports = (models, store, config) ->
-  {User} = models
+  {User, AuthedAction} = models
 
   google = new passport-google-oauth.OAuth2Strategy {
     client-ID: config.GOOGLE_CLIENT_ID
@@ -150,6 +150,16 @@ module.exports = (models, store, config) ->
         user
           .set 'status' if user.get 'verifiedEmail' then 'active' else 'pending'
           .save!
+      .tap (user) ->
+        if user.get \verifiedEmail
+          # Send welcome email
+          user.send-mail 'eak-normal-welcome'
+        else
+          # Send verify + welcome email
+          AuthedAction.create user, 'verify-email'
+            .then (key) ->
+              template = if user.adult! then 'eak-normal-confirm-email' else 'eak-parent-confirm-email'
+              user.send-mail template, confirm: "#{config.APP_ROOT}/v1/action/verify-email/#{key}"
       .then (user) ->
         req.session.passport = user: user.id
         user.to-safe-json!

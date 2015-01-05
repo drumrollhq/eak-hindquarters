@@ -115,7 +115,6 @@ module.exports = (orm, db, models, BaseModel) ->
         .then ~> sup.apply @, args
 
     send-mail: (template-name, data) ->
-      console.log {template-name, data}
       mail.send template-name, this, data
 
     @username = -> "#{capitalize random adjectives}#{capitalize random nouns}#{Math.floor 100 * Math.random!}"
