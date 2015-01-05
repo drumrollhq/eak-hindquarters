@@ -52,7 +52,7 @@ module.exports = models = {
 }
 
 create-models = ->
-  model-names = <[User OAuth]>
+  model-names = <[User OAuth AuthedAction]>
   base = BaseModel orm, db, models
   for name in model-names
     models[name] = (require "./#{name}")(orm, db, models, base)
