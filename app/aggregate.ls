@@ -32,8 +32,10 @@ get-blanks = (start, end) ->
 module.exports = aggregate = {
   setup: (store) ->
     @store = store
+    log.info 'setting up'
     store.collection-async \aggregate
       .then (m) ->
+        log.info 'setup complete'
         model := m
         set-interval aggregate.prepare, 1000ms * 60s * 30m
         aggregate.prepare!

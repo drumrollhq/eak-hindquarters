@@ -15,6 +15,7 @@ db = knex {
   client: \pg
   connection:
     host: config.DB_HOST
+    port: config.DB_PORT
     user: config.DB_USER
     password: config.DB_PW
     database: config.DB_NAME
@@ -33,9 +34,11 @@ log = log.create 'db'
 
 module.exports = models = {
   setup: ->
+    log.info 'pinging database'
     db.raw 'select 1 as ping'
       .then ({rows}) ->
         assert rows.0.ping is 1
+        log.info 'Ping successful!'
         db.migrate.currentVersion!
       .then (version) -> log.info {version} "Running migrations"
       .then -> db.migrate.latest!

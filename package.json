@@ -36,6 +36,7 @@
     "passport-facebook": "^1.0.3",
     "passport-google-oauth": "^0.1.5",
     "pg": "^4.1.1",
+    "pg-native": "^1.7.3",
     "prelude-ls": "^1.1.1",
     "supertest-as-promised": "^1.0.0"
   },

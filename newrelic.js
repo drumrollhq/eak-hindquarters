@@ -9,10 +9,6 @@ exports.config = {
    * Array of application names.
    */
   app_name : ['E.A.K. Server'],
-  /**
-   * Your New Relic license key.
-   */
-  license_key : process.env.NR_KEY,
   logging : {
     /**
      * Level at which to log. 'trace' is most useful to New Relic when diagnosing
