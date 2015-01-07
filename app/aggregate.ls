@@ -43,7 +43,7 @@ module.exports = aggregate = {
 
     now = moment timestamp
     ids = relevant-aggregate-ids now
-    model.find-and-modify-async {_id: $in: ids}, [<[_id asc]>], {$inc: "#type": 1}
+    model.update-async {_id: $in: ids}, {$inc: "#type": 1}, {multi: true}
       ..then ->
         log.debug "Updated #{ids.length} ids for event type #type."
 
