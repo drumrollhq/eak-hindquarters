@@ -63,6 +63,7 @@ module.exports = (orm, db, models, BaseModel) ->
             message: 'Your confirmation doesn\'t match your password! FIX IT FIX IT FIX IT!'
 
     oauths: -> @has-many models.OAuth
+    games: -> @has-many models.Game
 
     adult: -> @get 'assumeAdult'
 
@@ -143,3 +144,9 @@ module.exports = (orm, db, models, BaseModel) ->
 
     @find = (user-id) ->
       User.forge User.get-id-spec user-id
+
+    @ensure-logged-in = (req, res, next) ->
+      if req.user?
+        next!
+      else
+        res.promise errors.unauthenticated 'You must be logged in to access this resource'
