@@ -149,4 +149,4 @@ module.exports = (orm, db, models, BaseModel) ->
       if req.user?
         next!
       else
-        res.promise errors.unauthenticated 'You must be logged in to access this resource'
+        res.promise errors.unauthorized 'You must be logged in to access this resource'

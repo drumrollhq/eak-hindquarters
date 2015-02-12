@@ -1,4 +1,5 @@
 require! {
+  '../../errors'
   'express'
   'passport'
   'prelude-ls': {min}
@@ -17,12 +18,12 @@ module.exports = (models, store, config) ->
   app.get '/me' (req, res) ->
     if req.user?
       resp = req.user
-        .fetch with-related: <[oauths]>, required: true
+        .fetch with-related: <[oauths]>, require: true
         .then (user) -> {logged-in: true, user: user.to-safe-json!, device: req.session.device-id}
+        .catch User.NotFoundError, -> errors.unauthorized 'Your user does not exist'
       res.promise resp
     else
       res.json {logged-in: false, device: req.session.device-id}
-
 
   app.get '/:username/exists' (req, res) ->
     username = req.params.username
