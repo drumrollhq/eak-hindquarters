@@ -2,6 +2,7 @@ require('LiveScript');
 config = require('./config');
 
 var conn = {
+  debug: true,
   client: 'pg',
   connection: {
     host: config.DB_HOST,

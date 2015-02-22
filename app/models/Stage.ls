@@ -1,7 +1,7 @@
 module.exports = (orm, db, models, BaseModel) ->
-  class Area extends BaseModel
+  class Stage extends BaseModel
     has-timestamps: <[createdAt updatedAt]>
-    table-name: \area
+    table-name: \stage
     id-attribute: \id
 
     game: -> @belongs-to models.Game

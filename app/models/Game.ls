@@ -8,7 +8,8 @@ module.exports = (orm, db, models, BaseModel) ->
       url: <[required]>
 
     user: -> @belongs-to models.User
-    active-area: -> @belongs-to models.Area, 'active_area'
+    active-stage: -> @belongs-to models.Stage, 'active_stage'
+    stages: -> @has-many models.Stage
 
     @for-user = (id, {limit = null}) ->
       Game

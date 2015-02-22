@@ -55,7 +55,7 @@ module.exports = models = {
 }
 
 create-models = ->
-  model-names = <[User OAuth AuthedAction Game Area]>
+  model-names = <[User OAuth AuthedAction Game Stage]>
   base = BaseModel orm, db, models
   for name in model-names
     models[name] = (require "./#{name}")(orm, db, models, base)
