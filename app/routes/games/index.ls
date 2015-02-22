@@ -17,7 +17,8 @@ module.exports = (models, store, config) ->
 
   app.get '/:id' (req, res) ->
     res.promise games.get req.user.id, req.params.id, {
-      areas: req.query.areas or false
+      stages: req.query.stages or false
+      levels: req.query.levels or false
     }
 
   app.delete '/:id' (req, res) ->

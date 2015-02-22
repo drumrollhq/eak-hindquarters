@@ -6,3 +6,4 @@ module.exports = (orm, db, models, BaseModel) ->
 
     game: -> @belongs-to models.Game
     user: -> @belongs-to models.User .through models.Game
+    levels: -> @has-many models.Level
