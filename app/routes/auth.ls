@@ -190,7 +190,7 @@ module.exports = (models, store, config) ->
           user.check-password req.body.password
       .then (user) ->
         req.session.passport = user: user.id
-        {logged-in: true, user: user}
+        {logged-in: true, user: user.to-safe-json!}
 
     res.promise result
 

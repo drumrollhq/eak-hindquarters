@@ -65,7 +65,6 @@ module.exports = games = (models, store, config) ->
       .then (g) ->
         unless g? then return errors.not-found 'game not found'
         game := g
-      .then ->
         stage-data.game-id = game-id
         Stage.forge stage-data.{game-id, url, type} .fetch!
       .then (stage-model) ->
@@ -82,3 +81,55 @@ module.exports = games = (models, store, config) ->
         resp = stage.to-json!
         if levels then resp.levels = levels.map ( .to-json! )
         resp
+
+  save-kitten: (user-id, game-id, level-id, kitten-id) ->
+    game = null
+    Game.forge {id: game-id, user-id} .fetch!
+      .then (g) ->
+        unless g? then return errors.not-found 'game not found'
+        game := g
+        Level
+          .query (qb) ->
+            qb.join 'stage', 'level.stage_id' '=' 'stage.id'
+              .where 'stage.game_id' '=' game-id
+              .andWhere 'level.id' '=' level-id
+          .fetch!
+      .then (level) ->
+        unless level? then return errors.not-found 'level not found'
+        Promise.all [
+          game.update-state (state) -> if state.kitten-count then state.kitten-count += 1 else state.kitten-count = 1
+          level.update-state (state) -> state.{}kittens[kitten-id] = new Date!
+        ]
+      .spread (game, level) -> {
+        total: game.get 'state' .kitten-count
+        level: level.get 'state'
+      }
+
+  patch-stage-state: (user-id, game-id, stage-id, patch) ->
+    Stage
+      .query (qb) ->
+        qb.join \game, 'game.id' '=' 'stage.game_id'
+          .where {
+            'game.user_id': user-id
+            'game.id': game-id
+            'stage.id': stage-id
+          }
+      .fetch!
+      .then (stage) ->
+        unless stage? then return errors.not-found 'stage not found'
+        stage.patch-state patch
+
+  patch-level-state: (user-id, game-id, level-id, patch) ->
+    Level
+      .query (qb) ->
+        qb.join \stage, 'stage.id' '=' 'level.stage_id'
+          .join \game, 'game.id' '=' 'stage.game_id'
+          .where {
+            'game.user_id': user-id
+            'game.id': game-id
+            'level.id': level-id
+          }
+      .fetch!
+      .then (level) ->
+        unless level? then return error.not-found 'Level not found'
+        level.patch-state patch

@@ -29,3 +29,15 @@ module.exports = (models, store, config) ->
 
   app.post '/:id/stages' (req, res) ->
     res.promise games.find-or-create-stage req.user.id, req.params.id, req.body
+
+  app.post '/:gameId/levels/:levelId/kittens' (req, res) ->
+    res.promise games.save-kitten req.user.id, req.params.game-id, req.params.level-id, req.body.kitten
+
+  app.put '/:id/state' (req, res) ->
+    res.promise games.patch-state req.user.id, req.params.id, req.body
+
+  app.put '/:gameId/stages/:stageId/state' (req, res) ->
+    res.promise games.patch-stage-state req.user.id, req.params.game-id, req.params.stage-id, req.body
+
+  app.put '/:gameId/levels/:levelId/state' (req, res) ->
+    res.promise games.patch-level-state req.user.id, req.params.game-id, req.params.level-id, req.body

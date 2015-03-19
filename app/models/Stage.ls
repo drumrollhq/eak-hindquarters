@@ -1,6 +1,7 @@
 module.exports = (orm, db, models, BaseModel) ->
   class Stage extends BaseModel
     has-timestamps: <[createdAt updatedAt]>
+    has-state: true
     table-name: \stage
     id-attribute: \id
 

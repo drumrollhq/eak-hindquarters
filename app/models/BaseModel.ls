@@ -1,5 +1,7 @@
 require! {
   'checkit'
+  'lodash/lang/cloneDeep'
+  'lodash/object/merge'
   'prelude-ls': {camelize, dasherize, empty}
 }
 
@@ -25,6 +27,7 @@ module.exports = (orm, db, models) ->
   class BaseModel extends orm.Model
     initialize: ->
       @on 'change' ~> @_cast!
+      unless @has-state then @update-state = @patch-state = null
 
     parse: (attrs) -> {[(camelize key), value] for key, value of attrs}
     format: (attrs) ->
@@ -53,3 +56,12 @@ module.exports = (orm, db, models) ->
 
     to-json: -> @to-JSON!
     table: -> db @table-name
+
+    # Update and save state. fn should mutate state.
+    update-state: (fn) ->
+      state = clone-deep @get 'state'
+      fn state
+      @save {state}, patch: true
+
+    patch-state: (patch) ->
+      @update-state (state) -> merge state, patch
