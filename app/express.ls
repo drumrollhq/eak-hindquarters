@@ -34,6 +34,7 @@ module.exports = (models, store, routes, config, log) ->
     .use passport.session!
     .use user-id
     .use routes models, store, config
+    .use four-oh-four
     .use error-handler
 
 express-promise = (req, res, next) ->
@@ -45,7 +46,6 @@ express-promise = (req, res, next) ->
         res.json value
       .catch (e) ->
         req.log.debug 'express-promise: reject'
-        console.log 'rejecting. is-promise:' e
         error-handler e, req, res
 
   res.promise-render = (view-name, data = {}) ->
@@ -69,16 +69,23 @@ error-handler = (err, req, res, next) ->
   if req._errd then return
   req._errd = true
   if err.status?
-    res.status err.status .json err
+    send-err req, res, err.status, err
   else
-    req.log.error 'Error handling request:', err
-    res.status 500 .json status: 500, reason: \unknown, details: (err.message or err)
+    send-err req, res, 500, status: 500, reason: \unknown, details: (err.message or err)
+
+four-oh-four = (req, res, next) ->
+  send-err req, res, 404, status: 404, reason: 'Not Found', details: 'That endpoint doesn\'t exist'
+
+send-err = (req, res, status, err) ->
+  res._log-err = err
+  res.status status .json err
 
 request-logger = (log) -> (req, res, next) ->
   req._start-at = process.hrtime!
   req._start-time = Date.now!
   req._remote-address = req.headers.'x-forwarded-for' or req.ip
-  req.log = log.child req-id: uuid.v4!
+  req.req-id = uuid.v4!
+  req.log = log.child req.{req-id}
 
   logger = ->
     res.remove-listener 'close', logger
@@ -91,8 +98,19 @@ request-logger = (log) -> (req, res, next) ->
     url = req.original-url or req.url
     device-id = req.session?.device-id
     remote-address = req._remote-address
-    req.log.info {ms, status, content-length, method, url, device-id, remote-address},
-      "#{method} #{url} -> #status [#{if content-length then format-length content-length else 'streaming'}] #{ms.to-fixed 2}ms"
+
+    a1 = {ms, status, content-length, method, url, device-id, remote-address}
+    a2 = "#{method} #{url} -> #status [#{if content-length then format-length content-length else 'streaming'}] #{ms.to-fixed 2}ms"
+    if res._log-err
+      a3 = res._log-err
+
+    s = Math.floor status / 100
+    if s is 5
+      req.log.error a1, a2, a3
+    else if s is 4
+      req.log.warn a1, a2, a3
+    else
+      req.log.info a1, a2, a3
 
   res.on 'close' logger
   res.on 'finish' logger
