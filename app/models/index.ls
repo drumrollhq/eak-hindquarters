@@ -9,6 +9,7 @@ require! {
   'bookshelf'
   'knex'
   'path'
+  'node-uuid': uuid
 }
 
 db = knex {
@@ -25,12 +26,24 @@ db = knex {
     extension: 'ls'
     directory: path.resolve __dirname, '../../migrations'
     database: config.DB_NAME
-  debug: config.DEBUG_SQL
 }
 
 orm = bookshelf db
 
 log = log.create 'db'
+
+if config.DEBUG_SQL
+  db.client.on \start (builder) ->
+    sql = builder.to-query!
+    start = process.hrtime!
+    id = uuid.v4!
+    method = builder._method or \select
+
+    log.trace {method, id, sql}, \start
+    builder.on \end ->
+      diff = process.hrtime start
+      duration = (diff.0 * 1e3 + diff.1 * 1e-6).to-fixed 2
+      log.debug {method, duration, id, sql}, \query
 
 module.exports = models = {
   setup: ->
