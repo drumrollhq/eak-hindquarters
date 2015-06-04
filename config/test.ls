@@ -9,4 +9,5 @@ module.exports = {
   PORT: 3141
   SECURE_COOKIE_1: 'foo'
   SECURE_COOKIE_2: 'bar'
+  STRIPE_KEY: 'unittest'
 }

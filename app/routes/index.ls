@@ -1,10 +1,5 @@
 require! {
   '../../version-info.js'
-  './action'
-  './auth'
-  './count'
-  './sessions'
-  './users'
   'express'
   'moment'
   'os'
@@ -15,7 +10,7 @@ module.exports = (models, store, config) ->
   v1 = express.Router!
 
   router.use '/v1', v1
-  <[action auth count sessions users cards games]> .for-each (name) ->
+  <[action auth count sessions users cards games subscriptions]> .for-each (name) ->
     v1.use "/#name" (require "./#name")(models, store, config)
 
   start = Date.now!

@@ -1,10 +1,13 @@
 require! {
   '../errors'
   '../mail'
+  '../stripe'
   'bcrypt'
   'bluebird': Promise
   'fs'
-  'prelude-ls': {reject, empty, capitalize}
+  'geoip-lite': geoip
+  'prelude-ls': {reject, empty, capitalize, count-by, id, last, sort-by, obj-to-pairs, filter, map}
+  'vatrates/vatrates'
 }
 
 Promise.promisify-all bcrypt
@@ -73,6 +76,7 @@ module.exports = (orm, db, models, BaseModel) ->
       safe.has-password = !!user.password-digest
       safe.oauths = @related 'oauths' .to-JSON! .map (oauth) -> oauth.{provider, provider-id}
       safe.name = @name!
+      safe.country = @country!
       safe
 
     to-mail-recipient: (type = 'to') -> {
@@ -117,6 +121,72 @@ module.exports = (orm, db, models, BaseModel) ->
 
     send-mail: (template-name, data) ->
       mail.send template-name, this, data
+
+    # because of shitty VATMOSS stuff, we need to collect the users country. VATMOSS requires that
+    # we have 2 non-conflicting pieces of evidence of the users country, so we collect three: ip
+    # address, card country, and user-supplied country. As long as at least two of these match,
+    # we're good. Otherwise, panic and cry a bit?
+    set-country: ({ip, card-country, user-country}) ->
+      ip-country = if ip?
+        geoip.lookup ip .country.to-lower-case!
+      else @get \ipCountry
+
+      card-country ?= card-country or @get \stripeCardCountry
+      user-country ?= user-country or @get \userCountry
+
+      if card-country then card-country .= to-lower-case!
+      if user-country then user-country .= to-lower-case!
+
+      [country, count] = @country [ip-country, card-country, user-country], include-count: true
+
+      if count < 2 then return errors.bad-request "Conflicting country information: at least 2 countrys should match"
+
+      # save country info for later
+      @save {ip-country, stripe-card-country: card-country, user-country}, patch: true
+        .then -> country
+
+    country: (country-list, {include-count = false} = {}) ->
+      country-list ?= [\ipCountry \stripeCardCountry \userCountry]
+        |> map ~> @get it
+
+      try
+        [country, count] = country-list
+          |> filter -> it? # reject null/undefined
+          |> count-by id # count number of each country
+          |> obj-to-pairs
+          |> sort-by last
+          |> last # find the country that occurs the most
+      catch e
+        [country, count] = [null, 0]
+
+      if include-count then return [country, count] else return country
+
+    calculate-vat-rate: ->
+      if vatrates[@country!.to-upper-case!] then that.rates.standard / 100 else 0
+
+    find-or-create-stripe-customer: (token) ->
+      customer-id = @get \stripeCustomerId
+      if customer-id?
+        stripe.customers.retrieve customer-id
+          .then (customer) ~>
+            if customer.deleted
+              @unset \stripeCustomerId
+              @find-or-create-stripe-customer token
+            else if token
+              stripe.customers.update customer.id, source: token
+            else
+              customer
+      else
+        stripe.customers
+          .create {
+            description: "User(#{@id}) - @#{@get \username} - #{@name!}"
+            email: @get \email
+            metadata: @to-safe-json!{id, username, email, first-name, last-name, gender, created-at, country}
+            tax_percent: @calculate-vat-rate! * 100
+            source: token
+          }
+          .tap (customer) ~>
+            @save {stripe-customer-id: customer.id}, {patch: true}
 
     @username = -> "#{capitalize random adjectives}#{capitalize random nouns}#{Math.floor 100 * Math.random!}"
 

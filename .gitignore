@@ -2,3 +2,4 @@ node_modules
 **/*.marko.js
 config/credentials.ls
 npm-debug.log
+**/*.swp
