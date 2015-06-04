@@ -11,3 +11,4 @@ addons:
 before_script:
   - psql -c "create user hindquarters_test with nocreatedb nocreaterole login password 'test';" -U postgres
   - psql -c "create database hindquarters_test encoding 'UTF8' owner hindquarters_test;" -U postgres
+  - 'echo "module.exports = { DB_SSL: false }" > config/credentials.ls'
