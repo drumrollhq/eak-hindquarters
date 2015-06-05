@@ -188,6 +188,22 @@ module.exports = (orm, db, models, BaseModel) ->
           .tap (customer) ~>
             @save {stripe-customer-id: customer.id}, {patch: true}
 
+    subscribe-plan: (plan, token) ->
+      save-plan = true
+      @find-or-create-stripe-customer token
+        .then (customer) ->
+          if customer.subscriptions?.data?.length > 0
+            subscription = customer.subscriptions.data.0
+            if subscription.plan.id is plan
+              save-plan := false
+              subscription
+            else
+              stripe.customers.update-subscription customer.id, subscription.id, plan: plan
+          else
+            stripe.customers.create-subscription customer.id, plan: plan
+        .tap (subscription) ~>
+          if save-plan then @save {plan: subscription.plan.id}, patch: true
+
     @username = -> "#{capitalize random adjectives}#{capitalize random nouns}#{Math.floor 100 * Math.random!}"
 
     @unused-username = ->

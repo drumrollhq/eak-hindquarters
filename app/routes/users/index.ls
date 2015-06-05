@@ -25,6 +25,13 @@ module.exports = (models, store, config) ->
     else
       res.json {logged-in: false, device: req.session.device-id}
 
+  app.get '/me/customer' (req, res) ->
+    resp = req.user.fetch require: true
+      .then (user) ->
+        user.find-or-create-stripe-customer!
+
+    res.promise resp
+
   app.get '/:username/exists' (req, res) ->
     username = req.params.username
     if username.match /^[0-9]*$/ then id = parse-int username

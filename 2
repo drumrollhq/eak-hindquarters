@@ -295,7 +295,6 @@ describe 'User#subscribe-plan' ->
       user.subscribe-plan \new-plan
         .tap ->
           expect user.get \plan .to.equal \new-plan
-          stripe.customers.update-subscription.restore!
 
     specify 'should do nothing when attempting to subscribe to the same plan' ->
       expect user.get \plan .to.equal \eak-parent-monthly
