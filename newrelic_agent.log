@@ -1,3 +1,0 @@
-{"v":0,"level":50,"name":"newrelic","hostname":"Joes-MacBook-Air.local","pid":86273,"time":"2015-01-07T18:31:31.047Z","msg":"A valid account license key cannot be found. Has a license key been specified in the agent configuration file or via the NEW_RELIC_LICENSE_KEY environment variable?"}
-{"v":0,"level":40,"name":"newrelic","hostname":"Joes-MacBook-Air.local","pid":86273,"time":"2015-01-07T18:31:31.554Z","msg":"Unrecognized version NaN of Express detected; not instrumenting","component":"express"}
-{"v":0,"level":50,"name":"newrelic","hostname":"Joes-MacBook-Air.local","pid":86273,"time":"2015-01-07T18:31:32.195Z","msg":"New Relic for Node.js halted startup due to an error:"}
