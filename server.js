@@ -3,4 +3,6 @@ if (process.env.NR_ENABLED) {
 }
 
 require('LiveScript');
-require('./app').start();
+
+var config = require('./config');
+require('./lib').start(config, __dirname);

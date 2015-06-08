@@ -26,8 +26,6 @@ twitter = new Twitter {
   access_token_secret: config.CARDS_TWITTER_ACCESS_SECRET
 }
 
-console.log twitter
-
 twitter = Promise.promisify-all twitter
 
 module.exports = (models, store, config) ->

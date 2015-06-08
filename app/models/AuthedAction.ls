@@ -1,5 +1,5 @@
 require! {
-  '../errors'
+  '../../lib/errors'
   'bcrypt'
   'bluebird': Promise
   'crypto'

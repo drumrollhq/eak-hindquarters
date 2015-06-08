@@ -1,7 +1,7 @@
 require! {
-  '../errors'
-  '../mail'
-  '../stripe'
+  '../../lib/errors'
+  '../../lib/mail'
+  '../../lib/stripe'
   'bcrypt'
   'bluebird': Promise
   'fs'
