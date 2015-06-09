@@ -8,6 +8,8 @@ const vowels = 'aeiou'
 const consonants = 'bdklmnrsvwy'
 const default-bases = [consonants, vowels]
 
+var store, log
+
 num-to-char = (n, alphabet) -> alphabet[n]
 
 get-length = (n, bases) ->
@@ -27,6 +29,10 @@ get-exp = (len, bases) ->
     i++
   exp
 
+export setup = ({store: s, log: l}) ->
+  store := s
+  log := l
+
 export generate = (n, bases = default-bases) ->
   n = n + bases[0].length
   length = get-length n, bases
@@ -41,7 +47,7 @@ export generate = (n, bases = default-bases) ->
 
   out.join ''
 
-export get-unique = (store, type) ->
+export get-unique = (type) ->
   store
     .collection 'idCounters'
     .find-and-modify-async(
@@ -50,5 +56,6 @@ export get-unique = (store, type) ->
       { $inc: {count: 1}},
       { new: true, upsert: true })
     .spread (counter) ->
-      console.log counter
-      generate counter.count
+      id = generate counter.count
+      log.debug "Created ID #type##{counter.count} -> #id"
+      id

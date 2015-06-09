@@ -2,6 +2,8 @@ require! {
   './models'
   './log'
   './store'
+  './endpoints'
+  './services'
   'path'
 }
 
@@ -9,12 +11,12 @@ export start = (config, root) ->
   Promise
     .all [
       models.setup config, log, path.join root, 'app/models'
-      store.setup config
+      store.setup!
     ]
-    .then -> Promise.all [
-      endpoints.setup {config, store, models, log}
-      services.setup {config, store, models, log}
-    ]
+    .then -> services.setup {config, store, models, log}, path.join root, 'app/services'
+    .then ->
+      console.log 'endpoints.setup pew'
+      endpoints.setup {config, store, models, log, services}
     .then -> new Promise (resolve, reject) ->
       routes = require path.join root, 'app/routes'
       express-app = express app, routes

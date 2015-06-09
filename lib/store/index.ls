@@ -5,6 +5,8 @@ require! {
   'mongoskin'
 }
 
+log = log.create 'store'
+
 for key, value of mongoskin when typeof value is 'function'
   bluebird.promisify-all value
   bluebird.promisify-all value.prototype

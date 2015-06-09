@@ -1,4 +1,4 @@
-module.exports = (orm, db, models, BaseModel) ->
+module.exports = (orm, db, models, BaseModel, log) ->
   class OAuth extends BaseModel
     table-name: 'oauth'
     id-attribute: 'provider_id'

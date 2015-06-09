@@ -69,5 +69,5 @@ create-models = (orm, db, models, base-path, log) ->
   for name in model-names
     model-path = path.join base-path, name
     model-logger = log.child model: name
-    models[name] = (require model-path)(orm, db, models, base, log.child model: name)
+    models[name] = (require model-path)(orm, db, models, base, model-logger)
     model-logger.debug 'Registered model'

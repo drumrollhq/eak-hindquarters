@@ -19,7 +19,7 @@ nouns = fs.read-file-sync "#{__dirname}/../../data/nouns.txt" encoding: 'utf-8'
 
 random = (arr) -> arr[Math.floor arr.length * Math.random!]
 
-module.exports = (orm, db, models, BaseModel) ->
+module.exports = (orm, db, models, BaseModel, log) ->
   class User extends BaseModel
     has-timestamps: true
     table-name: 'user'

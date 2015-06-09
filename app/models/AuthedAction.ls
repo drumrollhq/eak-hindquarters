@@ -11,7 +11,7 @@ Promise.promisify-all
 
 const expire-time = 1000ms * 60s * 60m * 24h * 30d
 
-module.exports = (orm, db, models, BaseModel) ->
+module.exports = (orm, db, models, BaseModel, log) ->
   class AuthedAction extends BaseModel
     has-timestamps: true
     table-name: 'authed_action'
