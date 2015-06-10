@@ -7,4 +7,5 @@ module.exports = {
   SECURE_COOKIE_1: 'foo'
   SECURE_COOKIE_2: 'bar'
   ECARDS_S3_BUCKET: 'eak-ecards-dev'
+  REPL: true
 }

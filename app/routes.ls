@@ -29,12 +29,13 @@ module.exports = {
 
     count:
       _id: GET: \count.one
-}/*
 
     sessions:
       POST: \sessions.create
       _session-id:
         POST: \sessions.checkin
+        GET: \sessions.fetch
+}/*
         DELETE: \sessions.stop
         events:
           POST: \sessions.events.create

@@ -7,11 +7,12 @@ require! {
   './store'
   './express'
   './errors'
+  'bluebird': Promise
   'path'
   'http'
 }
 
-ctx = {store, models, log, services, endpoints, errors}
+ctx = {store, models, log, services, endpoints, errors, Promise}
 
 export start = (config, root) ->
   ctx.config = config
@@ -33,9 +34,12 @@ export start = (config, root) ->
         log.info 'Error starting server!'
         reject err
       else resolve!
-    .then -> log.info "#{process.pid} listening. Go to http://localhost:#{config.PORT}/"
+    .then ->
+      log.info "#{process.pid} listening. Go to http://localhost:#{config.PORT}/"
+      if config.REPL
+        require 'repl' .start '> ' .context <<< ctx
     .catch (e) ->
-      log.fatal "Error setting up." e
       console.error e
       console.dir e.stack
       process.exit 1
+      log.fatal "Error setting up." e

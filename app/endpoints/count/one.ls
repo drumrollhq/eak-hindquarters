@@ -9,9 +9,7 @@ export handler = ({store, options: {types}, params: {id}, errors}) ->
   if types.length > 0
     filter-fn = (key) -> (key not in <[_id interval t]>) and key in types
   else
-    filter-fn = (key) ->
-      console.log 'test key' key
-      (key not in <[_id interval t]>)
+    filter-fn = (key) -> key not in <[_id interval t]>
 
   store.collection \aggregate
     .find-one-async _id: id
