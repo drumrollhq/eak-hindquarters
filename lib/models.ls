@@ -11,7 +11,8 @@ require! {
   'node-uuid': uuid
 }
 
-exports.setup = (config, log, model-path) ->
+exports.setup = (ctx, model-path) ->
+  {config, log} = ctx
   db = exports.db = knex {
     client: \pg
     connection:
@@ -59,15 +60,15 @@ exports.setup = (config, log, model-path) ->
       backend = new AclKnexBackend db, 'acl_'
       bluebird.promisify-all Acl.prototype
       exports.acl = new Acl backend
-      create-models orm, db, exports, model-path, log
+      create-models orm, db, exports, model-path, ctx
 
-create-models = (orm, db, models, base-path, log) ->
+create-models = (orm, db, models, base-path, ctx) ->
   model-names = fs.readdir-sync base-path
     .filter ( .0 isnt '.' )
     .map ( .replace /\.[a-z]+$/, '' )
   base = BaseModel orm, db, models
   for name in model-names
     model-path = path.join base-path, name
-    model-logger = log.child model: name
-    models[name] = (require model-path)(orm, db, models, base, model-logger)
+    model-logger = ctx.log.child model: name
+    models[name] = (require model-path)(orm, db, models, base, {} <<< ctx <<< {log: model-logger})
     model-logger.debug 'Registered model'

@@ -77,6 +77,7 @@ four-oh-four = (req, res, next) ->
 
 send-err = (req, res, status, err) ->
   res._log-err = err
+  if typeof status isnt \number or status < 400 then status = 500 # Status codes MUST be error-type codes
   res.status status .json err
 
 request-logger = (log) -> (req, res, next) ->

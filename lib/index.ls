@@ -10,16 +10,19 @@ require! {
   'http'
 }
 
+ctx = {store, models, log, services, endpoints}
+
 export start = (config, root) ->
+  ctx.config = config
   Promise
     .all [
-      models.setup config, log, path.join root, 'app/models'
+      models.setup ctx, path.join root, 'app/models'
       store.setup!
     ]
-    .then -> services.setup {config, store, models, log}, path.join root, 'app/services'
-    .then -> endpoints.setup {config, store, models, log, services}, path.join root, 'app/endpoints'
+    .then -> services.setup ctx, path.join root, 'app/services'
+    .then -> endpoints.setup ctx, path.join root, 'app/endpoints'
     .then -> new Promise (resolve, reject) ->
-      router = routes.setup {config, store, models, log, services, endpoints}, path.join root, 'app/routes'
+      router = routes.setup ctx, path.join root, 'app/routes'
       templates = require path.join root, 'app/templates'
       express-app = express router, config, log, templates
       server = http.create-server express-app

@@ -30,6 +30,8 @@ flatten-obj = (obj, pre = []) ->
   for key, value of obj
     if typeof value is \object
       flat <<< flatten-obj value, (pre ++ [key])
+    else if key is 'index'
+      flat[pre.join '.'] = value
     else
       flat[(pre ++ [key]).join '.'] = value
 
@@ -39,7 +41,11 @@ export setup = ({config, store, models, log, services}, base-path) ->
   endpoints := flatten-obj walk base-path
   for key, file of endpoints =>
     endpoints[key] = require file
-    log.debug "Registered endpoint #key"
+    if typeof! endpoints[key] is \Object and endpoints[key].endpoint isnt false then
+      log.debug "Registered endpoint #key"
+    else
+      delete endpoints[key]
+
   endpoints
 
 export lookup-endpoint = (name = '') ->
@@ -55,9 +61,7 @@ export create-middleware = (spec) ->
     return (ctx, ...args) ->
       Promise.resolve (if before then before ctx, ...args else ctx)
         .then (ctx) ->
-          ctx.log.debug "Running middleware #spec"
           endpoint.handler ctx, ...args
-        .tap (new-ctx) -> ctx.log.debug "Completed middleware #spec" new-ctx
         .then (new-ctx = {}) -> ctx <<< new-ctx
   else if typeof! spec is \Object
     unless keys spec .length is 1 then throw new Error "Bad middleware spec: #{JSON.stringify spec}. Object should have only one key."
@@ -78,12 +82,8 @@ export create-handler = (name) ->
   if endpoint.use then before = create-middleware endpoint.use
 
   fn = (ctx) ->
-    if before then ctx.log.debug "Running 'before' step for handler #name"
     Promise.resolve (if before then before ctx else ctx)
       .then (ctx) ->
-        ctx.log.debug "Running handler #name"
         endpoint.handler ctx
-      .tap (res) ->
-        ctx.log.debug "Completed handler #name:" res
 
   [fn, endpoint]

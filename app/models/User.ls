@@ -1,6 +1,5 @@
 require! {
   '../../lib/errors'
-  '../../lib/mail'
   '../../lib/stripe'
   'bcrypt'
   'bluebird': Promise
@@ -19,7 +18,7 @@ nouns = fs.read-file-sync "#{__dirname}/../../data/nouns.txt" encoding: 'utf-8'
 
 random = (arr) -> arr[Math.floor arr.length * Math.random!]
 
-module.exports = (orm, db, models, BaseModel, log) ->
+module.exports = (orm, db, models, BaseModel, {log, services}) ->
   class User extends BaseModel
     has-timestamps: true
     table-name: 'user'
@@ -120,7 +119,7 @@ module.exports = (orm, db, models, BaseModel, log) ->
         .then ~> sup.apply @, args
 
     send-mail: (template-name, data) ->
-      mail.send template-name, this, data
+      services.mail.send template-name, this, data
 
     # because of shitty VATMOSS stuff, we need to collect the users country. VATMOSS requires that
     # we have 2 non-conflicting pieces of evidence of the users country, so we collect three: ip

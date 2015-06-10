@@ -1,4 +1,4 @@
-module.exports = (orm, db, models, BaseModel, log) ->
+module.exports = (orm, db, models, BaseModel, {log}) ->
   class Game extends BaseModel
     has-timestamps: <[createdAt updatedAt]>
     has-state: true

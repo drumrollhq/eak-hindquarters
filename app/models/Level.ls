@@ -1,4 +1,4 @@
-module.exports = (orm, db, models, BaseModel, log) ->
+module.exports = (orm, db, models, BaseModel, {log}) ->
   class Stage extends BaseModel
     table-name: \level
     id-attribute: \id

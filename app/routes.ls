@@ -3,8 +3,6 @@ module.exports = {
   v1:
     GET: \status
     action: verify-email: _key: GET: \actions.verify-email
-}
-{
     auth:
       register:
         # Rendered endpoints
@@ -20,14 +18,15 @@ module.exports = {
       # OAuth callbacks:
       google:
         GET: \auth.oauth.google
-        callback: GET: \auth.oauth.callback.google
+        callback: GET: \auth.oauth.google-callback
       facebook:
         GET: \auth.oauth.facebook
-        callback: GET: \auth.oauth.callback.facebook
+        callback: GET: \auth.oauth.facebook-callback
 
-      js-return: GET: \auth.js-return
+      js-return: GET: \auth.oauth.js-return
       login: POST: \auth.login
       logout: GET: \auth.logout
+}/*
 
     count:
       _id: GET: \count.one
@@ -71,3 +70,4 @@ module.exports = {
             kittens: POST: \games.save-kitten
             state: PUT: \games.patch-level-state
 }
+/**/

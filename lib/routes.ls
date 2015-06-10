@@ -51,22 +51,21 @@ export setup = ({config, models, store, services, endpoints, log}, base-path) ->
       ctx = {
         config, models, store, services, endpoints,
         log: req.log
-        http: {req, res}
+        http: {req, res, redirect: res.redirect.bind res}
         options: req.query
         body: req.body
         params: req.params
+        session: req.session
+        user: req.user
       }
 
       if endpoint.page
         # Let the endpoint handle rendering:
-        req.log.debug "Starting page handler #endpoint-name"
         ctx.render = res.promise-render
         handler ctx
           # Fallback to JSON error page. TODO: proper error pages
           .catch (e) -> res.promise Promise.reject e
       else # Send the result directly:
-        req.log.debug "Starting JSON handler #endpoint-name"
         res.promise handler ctx
-          .tap (res) -> req.log.debug 'Finished:', res
 
   router
