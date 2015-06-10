@@ -1,6 +1,8 @@
 module.exports = {
   v1:
     action: verify-email: _key: GET: \actions.verify-email
+}
+{
     auth:
       register:
         # Rendered endpoints
@@ -22,7 +24,7 @@ module.exports = {
         callback: GET: \auth.oauth.callback.facebook
 
       js-return: GET: \auth.js-return
-      login: POST: \auth.login'
+      login: POST: \auth.login
       logout: GET: \auth.logout
 
     count:
@@ -52,7 +54,7 @@ module.exports = {
 
     games:
       POST: \games.create
-      mine: \games.mine
+      mine: GET: \games.mine
       _game-id:
         GET: \games.get
         PUT: \games.patch
@@ -65,5 +67,5 @@ module.exports = {
         levels:
           _level-id:
             kittens: POST: \games.save-kitten
-            state: \games.patch-level-state
+            state: PUT: \games.patch-level-state
 }

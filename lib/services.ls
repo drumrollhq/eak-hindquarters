@@ -22,7 +22,6 @@ export setup = ({config, store, models, log}, base-path) ->
       service-log = log.create "service:#name"
       service-path = path.join base-path, name
       service = require service-path
-      console.log name, service
       setup-service service, name, {config, store, models, services, log: service-log}
         .then ->
           services[name] = service

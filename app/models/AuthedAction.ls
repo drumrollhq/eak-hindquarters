@@ -40,6 +40,7 @@ module.exports = (orm, db, models, BaseModel, log) ->
     @decode = (str) ->
       str = AuthedAction.restore-key str
       parts = new Buffer str, 'base64' .to-string! |> split ':'
+      log.debug 'parts' parts
       id = head parts
       key = parts |> tail |> join ':'
       {id, key}
@@ -64,6 +65,7 @@ module.exports = (orm, db, models, BaseModel, log) ->
 
     @use = (key) ->
       {id, key} = AuthedAction.decode key
+      unless id? and key? and id.match /^[0-9]+$/ then return errors.bad-request 'Invalid key'
       AuthedAction
         .where id: id, used: false
         .where 'created_at', '>', new Date Date.now! -  expire-time

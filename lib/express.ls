@@ -1,5 +1,4 @@
 require! {
-  './templates/views'
   'bluebird': Promise
   'body-parser'
   'compression'
@@ -11,8 +10,8 @@ require! {
   'passport'
 }
 
-module.exports = (models, store, routes, config, log) ->
-  log = log.create 'app'
+module.exports = (router, config, log, templates) ->
+  log = log.create 'express'
 
   session = cookie-session {
     keys: [config.SECURE_COOKIE_1, config.SECURE_COOKIE_2]
@@ -21,8 +20,8 @@ module.exports = (models, store, routes, config, log) ->
   }
 
   app = express!
-    .use express-promise
     .use request-logger log
+    .use express-promise templates
     .use express-cors allowed-origins: ['localhost:*' '*.eraseallkittens.com' '*.drumrollhq.com']
     .use compression!
     .use express.static __dirname + '/../public'
@@ -33,11 +32,11 @@ module.exports = (models, store, routes, config, log) ->
     .use passport.initialize!
     .use passport.session!
     .use user-id
-    .use routes models, store, config
+    .use router
     .use four-oh-four
     .use error-handler
 
-express-promise = (req, res, next) ->
+express-promise = (views) -> (req, res, next) ->
   res.promise = (p) ->
     p = if typeof! p is 'Array' then Promise.all p else p
     p

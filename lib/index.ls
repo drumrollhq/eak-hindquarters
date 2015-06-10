@@ -1,10 +1,13 @@
 require! {
-  './models'
-  './log'
-  './store'
   './endpoints'
+  './log'
+  './models'
+  './routes'
   './services'
+  './store'
+  './express'
   'path'
+  'http'
 }
 
 export start = (config, root) ->
@@ -14,12 +17,11 @@ export start = (config, root) ->
       store.setup!
     ]
     .then -> services.setup {config, store, models, log}, path.join root, 'app/services'
-    .then ->
-      console.log 'endpoints.setup pew'
-      endpoints.setup {config, store, models, log, services}
+    .then -> endpoints.setup {config, store, models, log, services}, path.join root, 'app/endpoints'
     .then -> new Promise (resolve, reject) ->
-      routes = require path.join root, 'app/routes'
-      express-app = express app, routes
+      router = routes.setup {config, store, models, log, services, endpoints}, path.join root, 'app/routes'
+      templates = require path.join root, 'app/templates'
+      express-app = express router, config, log, templates
       server = http.create-server express-app
       log.info 'starting server...'
       err <- server.listen config.PORT
