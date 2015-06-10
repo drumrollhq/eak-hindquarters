@@ -26,10 +26,10 @@ module.exports = {
       js-return: GET: \auth.oauth.js-return
       login: POST: \auth.login
       logout: GET: \auth.logout
-}/*
 
     count:
       _id: GET: \count.one
+}/*
 
     sessions:
       POST: \sessions.create

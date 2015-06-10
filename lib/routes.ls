@@ -39,7 +39,7 @@ parse-parts = (parts) ->
 
   {method, url, params}
 
-export setup = ({config, models, store, services, endpoints, log}, base-path) ->
+export setup = ({config, models, store, services, endpoints, log, errors}, base-path) ->
   routes = require base-path
   router = express.Router!
   route-log = log.create 'route'
@@ -49,7 +49,7 @@ export setup = ({config, models, store, services, endpoints, log}, base-path) ->
     [handler, endpoint] = endpoints.create-handler endpoint-name
     router[route.method] route.url, (req, res, next) ->
       ctx = {
-        config, models, store, services, endpoints,
+        config, models, store, services, endpoints, errors,
         log: req.log
         http: {req, res, redirect: res.redirect.bind res}
         options: req.query

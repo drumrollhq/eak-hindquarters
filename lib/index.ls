@@ -6,11 +6,12 @@ require! {
   './services'
   './store'
   './express'
+  './errors'
   'path'
   'http'
 }
 
-ctx = {store, models, log, services, endpoints}
+ctx = {store, models, log, services, endpoints, errors}
 
 export start = (config, root) ->
   ctx.config = config
