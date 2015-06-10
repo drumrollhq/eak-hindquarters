@@ -35,6 +35,8 @@ parse-parts = (parts) ->
       # normal url segment:
       url += "/#{dasherize part}"
 
+  if url is '' then url = '/'
+
   {method, url, params}
 
 export setup = ({config, models, store, services, endpoints, log}, base-path) ->

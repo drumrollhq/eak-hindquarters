@@ -1,5 +1,7 @@
 module.exports = {
+  GET: \status
   v1:
+    GET: \status
     action: verify-email: _key: GET: \actions.verify-email
 }
 {
