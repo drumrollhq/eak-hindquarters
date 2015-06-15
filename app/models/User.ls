@@ -1,6 +1,4 @@
 require! {
-  '../../lib/errors'
-  '../../lib/stripe'
   'bcrypt'
   'bluebird': Promise
   'fs'
@@ -18,7 +16,7 @@ nouns = fs.read-file-sync "#{__dirname}/../../data/nouns.txt" encoding: 'utf-8'
 
 random = (arr) -> arr[Math.floor arr.length * Math.random!]
 
-module.exports = (orm, db, models, BaseModel, {log, services}) ->
+module.exports = (orm, db, models, BaseModel, {log, services, stripe, errors}) ->
   class User extends BaseModel
     has-timestamps: true
     table-name: 'user'

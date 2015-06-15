@@ -1,18 +1,19 @@
 require! {
   './endpoints'
+  './errors'
+  './express'
   './log'
   './models'
   './routes'
   './services'
   './store'
-  './express'
-  './errors'
+  './stripe'
   'bluebird': Promise
-  'path'
   'http'
+  'path'
 }
 
-ctx = {store, models, log, services, endpoints, errors, Promise}
+ctx = {store, models, log, services, endpoints, errors, stripe, Promise}
 
 export start = (config, root) ->
   ctx.config = config
@@ -33,8 +34,8 @@ export start = (config, root) ->
       if err
         log.info 'Error starting server!'
         reject err
-      else resolve!
-    .then ->
+      else resolve ctx
+    .tap ->
       log.info "#{process.pid} listening. Go to http://localhost:#{config.PORT}/"
       if config.REPL
         require 'repl' .start '> ' .context <<< ctx

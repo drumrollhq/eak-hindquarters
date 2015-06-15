@@ -5,6 +5,5 @@ if (process.env.NR_ENABLED) {
 require('LiveScript');
 
 var config = require('./config');
-require('./lib').start(config, __dirname);
-
-var util = require('util');
+module.exports = require('./lib').start(config, __dirname);
+global.Promise = require('bluebird');

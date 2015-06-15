@@ -1,10 +1,13 @@
 require! {
   'node-uuid': uuid
   'bluebird': Promise
+  'joi'
 }
 
+export body = joi.object!
+
 export handler = ({user, session: {device-id}, body, store, services: {aggregate}}) ->
-  data <<< {
+  data = body <<< {
     user-id: device-id
     registered-user: user.id
     _id: uuid.v4!

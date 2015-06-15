@@ -2,7 +2,8 @@ require! {
   'vatrates/vatrates'
 }
 
-User = models.User
+User = ctx.models.User
+stripe = ctx.stripe
 
 new-user = {
   first-name: 'Tarquin'

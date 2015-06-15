@@ -56,8 +56,8 @@ get-validator = (endpoint) ->
   if endpoint.param-validator then schema.params = endpoint.param-validator
 
   if endpoint.options and endpoint.options.is-joi
-    schema.options = endpoint.options.required!
-  else if endpoint.options then schema.options = joi.object!.required!
+    schema.options = endpoint.options
+  else if endpoint.options then schema.options = joi.object!
 
   if endpoint.body and endpoint.body.is-joi
     schema.body = endpoint.body
@@ -146,17 +146,17 @@ export create-function-handler = (name, base-ctx) ->
       params = {[key, param-args[i]] for key, i in endpoint.param-list}
     else params = {}
 
-    if endpoint.has-body
+    if endpoint.body
       [[body], args] = split-at 1, args
-    else body = {}
+    body ?= {}
 
-    if endpoint.has-options
+    if endpoint.options
       [[options], args] = split-at 1, args
-    else options = {}
+    options ?= {}
 
     if args.length > 0
       [[ctx], args] = split-at 1, args
-    else ctx = {}
+    ctx ?= {}
 
     ctx = {} <<< base-ctx <<< {params, body, options} <<< ctx
     handler ctx

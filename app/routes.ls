@@ -35,8 +35,8 @@ module.exports = {
       _session-id:
         POST: \sessions.checkin
         GET: \sessions.fetch
-}/*
         DELETE: \sessions.stop
+}/*
         events:
           POST: \sessions.events.create
           _event-id:
