@@ -41,15 +41,16 @@ module.exports = {
           _event-id:
             POST: \sessions.events.update
             DELETE: \sessions.events.stop
-}/*
 
     users:
-      usernames: GET: \user.generate-usernames
-      me: GET: \user.current
+      usernames: GET: \users.generate-usernames
+      me: GET: \users.current
       _user-id:
-        customer: GET: \user.get-customer
-        exists: GET: \user.exists
+        GET: \users.fetch
+        exists: GET: \users.exists
+        customer: GET: \users.get-customer
 
+}/*
     cards:
       POST: \cards.publish
       share: POST: \cards.share

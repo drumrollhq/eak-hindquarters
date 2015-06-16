@@ -159,7 +159,8 @@ module.exports = (orm, db, models, BaseModel, {log, services, stripe, errors}) -
       if include-count then return [country, count] else return country
 
     calculate-vat-rate: ->
-      if vatrates[@country!.to-upper-case!] then that.rates.standard / 100 else 0
+      country = @country!
+      if country and vatrates[country.to-upper-case!] then that.rates.standard / 100 else 0
 
     find-or-create-stripe-customer: (token) ->
       customer-id = @get \stripeCustomerId
@@ -206,7 +207,7 @@ module.exports = (orm, db, models, BaseModel, {log, services, stripe, errors}) -
     @unused-username = ->
       username = User.username!
       User.exists username
-        .then ({exists}) -> if exists then User.unused-username! else username
+        .then (exists) -> if exists then User.unused-username! else username
 
     @get-id-spec = (user-id) ->
       spec = switch (typeof user-id)
@@ -223,7 +224,7 @@ module.exports = (orm, db, models, BaseModel, {log, services, stripe, errors}) -
       db.first 'id'
         .from User::table-name
         .where User.get-id-spec user-id
-        .then (row) -> exists: !!row
+        .then (row) -> !!row
 
     @find = (user-id) ->
       User.forge User.get-id-spec user-id

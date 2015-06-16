@@ -75,6 +75,7 @@ export setup = (ctx, base-path) ->
   for key, file of endpoints
     endpoint = require file
     if typeof! endpoint is \Object and endpoint.endpoint isnt false then
+      endpoint.name = key
       endpoints[key] = endpoint
       unless endpoint.middleware then set-at exports, key, create-function-handler key, ctx
       log.debug "Registered endpoint #key"
@@ -87,30 +88,7 @@ export lookup-endpoint = (name = '') ->
   unless endpoint then throw new Error "No endpoint #name"
   endpoint
 
-export create-middleware = (spec) ->
-  if typeof! spec is \String
-    endpoint = lookup-endpoint spec
-    if endpoint.use then before = create-middleware endpoint.use
-    return (ctx, ...args) ->
-      Promise.resolve (if before then before ctx, ...args else ctx)
-        .then (ctx) ->
-          endpoint.handler ctx, ...args
-        .then (new-ctx = {}) -> ctx <<< new-ctx
-  else if typeof! spec is \Object
-    unless keys spec .length is 1 then throw new Error "Bad middleware spec: #{JSON.stringify spec}. Object should have only one key."
-    handler = create-middleware first keys spec
-    extra-args = first values spec
-    if typeof! extra-args isnt \Array then extra-args = [extra-args]
-    return (ctx, ...args) ->
-      args .= concat extra-args
-      handler ctx, ...args
-  else
-    throw new Error "Unknown middleware spec: #{JSON.stringify spec}"
-
-export create-handler = (name) ->
-  endpoint = {} <<< lookup-endpoint name
-
-  if endpoint.middleware then throw new Error "Cannot use middleware endpoint #name as handler"
+create-handler-base = (endpoint) ->
   if endpoint.use then before = create-middleware endpoint.use
   if endpoint.params
     endpoint.param-list = []
@@ -129,11 +107,39 @@ export create-handler = (name) ->
 
   validate = endpoint.validate = get-validator endpoint
 
-  fn = (ctx) ->
-    Promise.resolve (if before then before ctx else ctx)
-      .then (ctx) -> if validate then validate ctx else ctx
+  (ctx, ...args) ->
+    Promise.resolve (if before then before ctx, ...args else ctx)
       .then (ctx) ->
-        endpoint.handler ctx
+        if validate
+          console.log 'validate' endpoint.name
+          validate ctx
+        else ctx
+      .then (ctx) ->
+        endpoint.handler ctx, ...args
+
+export create-middleware = (spec) ->
+  if typeof! spec is \String
+    endpoint = lookup-endpoint spec
+    fn = create-handler-base endpoint
+    return (ctx, ...args) ->
+      fn ctx, ...args
+        .then (new-ctx = {}) -> {} <<< ctx <<< new-ctx
+  else if typeof! spec is \Object
+    unless keys spec .length is 1 then throw new Error "Bad middleware spec: #{JSON.stringify spec}. Object should have only one key."
+    handler = create-middleware first keys spec
+    extra-args = first values spec
+    if typeof! extra-args isnt \Array then extra-args = [extra-args]
+    return (ctx, ...args) ->
+      args .= concat extra-args
+      handler ctx, ...args
+  else
+    throw new Error "Unknown middleware spec: #{JSON.stringify spec}"
+
+export create-handler = (name) ->
+  endpoint = {} <<< lookup-endpoint name
+
+  if endpoint.middleware then throw new Error "Cannot use middleware endpoint #name as handler"
+  fn = create-handler-base endpoint
 
   [fn, endpoint]
 
