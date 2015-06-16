@@ -9,7 +9,7 @@ export body = joi.object!
 export handler = ({user, session: {device-id}, body, store, services: {aggregate}}) ->
   data = body <<< {
     user-id: device-id
-    registered-user: user.id
+    registered-user: user?.id or \GUEST
     _id: uuid.v4!
     finished: false
     duration: 0

@@ -11,7 +11,7 @@ export body = joi.object!.keys {
 
 export params = [[\session-id, joi.string!.guid!]]
 
-export handler = ({params: {session-id}, session: {device-id}, services: {aggregate}, endpoints: {sessions}, body, store, errors, Promise}) ->
+export handler = ({params: {session-id}, session: {device-id}, services: {aggregate}, endpoints: {sessions}, body, store, errors}) ->
   unless body.type? and body.data? and typeof body.data is \object
     return errors.bad-request 'Event must have type and data'
 

@@ -109,11 +109,7 @@ create-handler-base = (endpoint) ->
 
   (ctx, ...args) ->
     Promise.resolve (if before then before ctx, ...args else ctx)
-      .then (ctx) ->
-        if validate
-          console.log 'validate' endpoint.name
-          validate ctx
-        else ctx
+      .then (ctx) -> if validate then validate ctx else ctx
       .then (ctx) ->
         endpoint.handler ctx, ...args
 
