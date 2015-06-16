@@ -50,11 +50,11 @@ module.exports = {
         exists: GET: \users.exists
         customer: GET: \users.get-customer
 
-}/*
     cards:
       POST: \cards.publish
       share: POST: \cards.share
 
+}/*
     games:
       POST: \games.create
       mine: GET: \games.mine
