@@ -118,7 +118,7 @@ describe 'endpoints.sessions' ->
             duration: 0
           }
 
-    describe.only 'events.create' ->
+    describe '.events.create' ->
       specify 'should error without type and data' ->
         sessions.events.create session-id, {}, ctx
           .then -> throw 'promise should error'
@@ -169,17 +169,17 @@ describe 'endpoints.sessions' ->
     describe 'with an existing event' ->
       event-id = event-id2 = null
       before-each ->
-        s1 = sessions.events.create session-id, device-id, type: 'kitten', has-duration: true, data: some: 'event'
+        s1 = sessions.events.create session-id, {type: 'kitten', has-duration: true, data: some: 'event'}, ctx
           .then (event) -> event-id := event.id
-          .then -> sessions.events.create session-id, device-id, type: 'death', has-duration: false, data: drama: true
+          .then -> sessions.events.create session-id, {type: 'death', has-duration: false, data: drama: true}, ctx
           .then (event) -> event-id2 := event.id
 
-      describe 'routes/sessions#checkin' ->
+      describe '.checkin' ->
         specify 'should update the duration of ids passed' ->
-          event1 = sessions.events.fetch event-id, session-id
+          event1 = sessions.events.fetch session-id, event-id
           event2 = event1
-            .then -> sessions.checkin session-id, device-id, ids: [event-id]
-            .then -> sessions.events.fetch event-id, session-id
+            .then -> sessions.checkin session-id, {ids: [event-id]}, ctx
+            .then -> sessions.events.fetch session-id, event-id
 
           Promise.all [event1, event2] .spread (event1, event2) ->
             expect event2.duration .to.be.greater-than event1.duration
@@ -187,7 +187,7 @@ describe 'endpoints.sessions' ->
         specify 'should not update events outside of passed ids' ->
           sess1 = sessions.fetch session-id, events: true
           sess2 = sess1
-            .then -> sessions.checkin session-id, device-id, ids: [event-id]
+            .then -> sessions.checkin session-id, {ids: [event-id]}, ctx
             .then -> sessions.fetch session-id, events: true
 
           Promise.all [sess1, sess2] .spread (sess1, sess2) ->
@@ -197,7 +197,7 @@ describe 'endpoints.sessions' ->
       describe '.stop' ->
         specify 'should use fetch under the hood' ->
           sinon.spy sessions, 'fetch'
-          sessions.stop session-id, device-id .then ->
+          sessions.stop session-id, ctx .then ->
             expect sessions.fetch .to.have.been.called
             expect sessions.fetch .to.have.been.called-with session-id, device: device-id, open: true, events: true, min: true
             sessions.fetch.restore!
@@ -216,7 +216,7 @@ describe 'endpoints.sessions' ->
         specify 'should set duration and finish for all open events' ->
           sess1 = sessions.fetch session-id, events: true
           sess2 = sess1
-            .then -> sessions.stop session-id, device-id
+            .then -> sessions.stop session-id, ctx
             .then -> sessions.fetch session-id, events: true
 
           Promise.all [sess1, sess2] .spread (sess1, sess2) ->
@@ -226,67 +226,67 @@ describe 'endpoints.sessions' ->
             expect sess1.events.1.duration .to.equal sess1.events.1.duration
 
         specify 'should return completed session' ->
-          sessions.stop session-id, device-id .then (session) ->
+          sessions.stop session-id, ctx .then (session) ->
             expect session .to.have.keys '_id' 'start' 'duration' 'finished' 'userId'
 
-      describe 'routes/sessions#events.fetch' ->
+      describe '.events.fetch' ->
         specify 'should return an event' ->
-          sessions.events.fetch event-id, session-id .then (event) ->
+          sessions.events.fetch session-id, event-id .then (event) ->
             expect event.id .to.equal event-id
             expect event.type .to.equal 'kitten'
 
         specify 'should use fetch with min: true and events: true' ->
           sinon.spy sessions, 'fetch'
-          sessions.events.fetch event-id, session-id .then ->
+          sessions.events.fetch session-id, event-id .then ->
             expect sessions.fetch .to.have.been.called-once
-            expect sessions.fetch .to.have.been.called-with session-id, min: true, events: true
+            expect sessions.fetch .to.have.been.called-with session-id, min: true, events: true, open: false
             sessions.fetch.restore!
 
         specify 'should return 404 when no matching event is found' ->
-          sessions.events.fetch 'fake-event', session-id
+          sessions.events.fetch session-id, uuid.v4!
             .then -> throw 'promise should error'
             .catch (e) -> expect e.status .to.equal 404
 
         specify 'should check event is open' ->
-          sessions.events.fetch event-id, session-id, open: true
+          sessions.events.fetch session-id, event-id, open: true
             .then (event) -> expect event.finished .to.equal false
             .then -> store.collection 'games' .update-async {_id: session-id}, {$set: 'events.0.finished': true}
-            .then -> sessions.events.fetch event-id, session-id, open: true
+            .then -> sessions.events.fetch session-id, event-id, open: true
             .then -> throw 'promise should error'
             .catch (e) -> expect e.status .to.equal 400
 
-      describe 'routes/sessions#events.update' ->
+      describe '.events.update' ->
         specify 'should fetch the event with events.fetch' ->
           sinon.spy sessions.events, 'fetch'
-          sessions.events.update event-id, session-id, device-id, awesome: true .then ->
+          sessions.events.update session-id, event-id, {awesome: true}, ctx .then ->
             expect sessions.events.fetch .to.have.been.called
-            expect sessions.events.fetch .to.have.been.called-with event-id, session-id, open: true, device: device-id
+            expect sessions.events.fetch .to.have.been.called-with session-id, event-id, open: true, device: device-id
             sessions.events.fetch.restore!
 
         specify 'should set the properties on the events data field' ->
-          sessions.events.update event-id, session-id, device-id, awesome: true
-            .then -> sessions.events.fetch event-id, session-id
+          sessions.events.update session-id, event-id, {awesome: true}, ctx
+            .then -> sessions.events.fetch session-id, event-id
             .then (event) ->
               expect event.data .to.deep.equal some: 'event', awesome: true
 
         specify 'should return the updated event' ->
-          sessions.events.update event-id, session-id, device-id, awesome: true .then (event) ->
+          sessions.events.update session-id, event-id, {awesome: true}, ctx .then (event) ->
             expect event.id .to.equal event-id
             expect event.data.awesome .to.equal true
 
-      describe 'routes/sessions#events.stop' ->
+      describe '.events.stop' ->
         specify 'should fetch the event with events.fetch' ->
           sinon.spy sessions.events, 'fetch'
-          sessions.events.stop event-id, session-id, device-id .then ->
+          sessions.events.stop session-id, event-id, ctx .then ->
             expect sessions.events.fetch .to.have.been.called
-            expect sessions.events.fetch .to.have.been.called-with event-id, session-id, open: true, device: device-id
+            expect sessions.events.fetch .to.have.been.called-with session-id, event-id, open: true, device: device-id
             sessions.events.fetch.restore!
 
         specify 'should update the duration and set finished' ->
-          event1 = sessions.events.fetch event-id, session-id
+          event1 = sessions.events.fetch session-id, event-id
           event2 = event1
-            .then -> sessions.events.stop event-id, session-id, device-id
-            .then -> sessions.events.fetch event-id, session-id
+            .then -> sessions.events.stop session-id, event-id, ctx
+            .then -> sessions.events.fetch session-id, event-id
 
           Promise.all [event1, event2] .spread (event1, event2) ->
             expect event2.duration .to.be.greater-than event1.duration
@@ -294,6 +294,6 @@ describe 'endpoints.sessions' ->
             expect event2.finished .to.equal true
 
         specify 'should return the stopped event' ->
-          sessions.events.stop event-id, session-id .then (event) ->
+          sessions.events.stop session-id, event-id, ctx .then (event) ->
             expect event.id .to.equal event-id
             expect event.data .to.deep.equal some: 'event'

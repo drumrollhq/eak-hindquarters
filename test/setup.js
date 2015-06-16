@@ -5,12 +5,13 @@ var config = require('../config');
 // Force stripe to use a bad key as all stripe stuff here should be mocked:
 config.STRIPE_KEY = 'unit-test';
 
-var app = require('../server'),
+var knex = require('knex'),
+  mongoskin = require('mongoskin'),
   Mocha = require('mocha'),
   chai = require('chai'),
   sinon = require('sinon'),
   sinonChai = require('sinon-chai'),
-  bluebird = require('bluebird'),
+  Promise = require('bluebird'),
   chaiAsPromised = require('chai-as-promised'),
   glob = require('glob');
 
@@ -28,14 +29,25 @@ var mocha = new Mocha({
 
 glob.sync(__dirname + '/**/*.ls').forEach(mocha.addFile.bind(mocha));
 
-app
-  .then(function (ctx) {
-    global.ctx = ctx;
-    console.log('Dropping tables owned by', config.DB_USER);
-    ctx.models.db.raw('DROP OWNED BY ' + config.DB_USER);
-  })
+var db = knex({
+  client: 'pg',
+  connection: {
+    host: config.DB_HOST,
+    port: config.DB_PORT,
+    user: config.DB_USER,
+    password: config.DB_PW,
+    database: config.DB_NAME,
+    ssl: config.DB_SSL
+  }
+});
+
+db.raw('DROP OWNED BY ' + config.DB_USER)
   .then(clearStore)
   .then(function() {
+    return require('../server.js');
+  })
+  .then(function(ctx) {
+    global.ctx = ctx;
     mocha.run(process.exit);
   })
   .catch(function(e) {
@@ -45,7 +57,7 @@ app
 
 function clearStore() {
   console.log('Clearing mongo');
-  var store = ctx.store;
+  var store = Promise.promisifyAll(mongoskin.db(config.MONGO_URL, {safe: true, auto_reconnect: true}));
   return store.collectionNamesAsync(null, {namesOnly: true})
     .map(function(name) {
       if (typeof name === 'object') name = name.name;

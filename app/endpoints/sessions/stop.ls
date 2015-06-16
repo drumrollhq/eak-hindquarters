@@ -1,8 +1,8 @@
 require! 'joi'
 
 export params = [[\session-id, joi.string!.guid!]]
-export handler = ({session: {device-id}, params: {session-id}, endpoints, store}) ->
-  endpoints.sessions.fetch session-id, device: device-id, open: true, min: true, events: true
+export handler = ({session, params: {session-id}, endpoints, store}) ->
+  endpoints.sessions.fetch session-id, device: session?.device-id, open: true, min: true, events: true
     .then (session) ->
       update = {
         duration: Date.now! - session.start

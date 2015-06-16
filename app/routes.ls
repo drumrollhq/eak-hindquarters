@@ -36,12 +36,12 @@ module.exports = {
         POST: \sessions.checkin
         GET: \sessions.fetch
         DELETE: \sessions.stop
-}/*
         events:
           POST: \sessions.events.create
           _event-id:
             POST: \sessions.events.update
             DELETE: \sessions.events.stop
+}/*
 
     users:
       usernames: GET: \user.generate-usernames
