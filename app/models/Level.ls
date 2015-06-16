@@ -4,5 +4,5 @@ module.exports = (orm, db, models, BaseModel, {log}) ->
     id-attribute: \id
     has-state: true
 
-    game: -> @belongs-to models.Game .through models.Area
-    area: -> @belongs-to models.Area
+    game: -> @belongs-to models.Game .through models.Stage
+    stage: -> @belongs-to models.Stage

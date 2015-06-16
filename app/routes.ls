@@ -54,22 +54,22 @@ module.exports = {
       POST: \cards.publish
       share: POST: \cards.share
 
-}/*
     games:
-      POST: \games.create
       mine: GET: \games.mine
+      POST: \games.create
       _game-id:
         GET: \games.get
         PUT: \games.patch
         DELETE: \games.delete
-        state: PUT: \game.patch-state
+        state: PUT: \games.patch-state
         stages:
-          POST: \games.find-or-create-stage
+          POST: \games.stages.find-or-create
           _stage-id:
-            state: PUT: \games.patch-stage-state
+            GET: \games.stages.get
+            state: PUT: \games.stages.patch-state
         levels:
           _level-id:
-            kittens: POST: \games.save-kitten
-            state: PUT: \games.patch-level-state
+            GET: \games.levels.get
+            kittens: POST: \games.levels.save-kitten
+            state: PUT: \games.levels.patch-state
 }
-/**/
