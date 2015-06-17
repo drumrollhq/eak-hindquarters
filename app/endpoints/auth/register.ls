@@ -3,7 +3,21 @@ require! {
   '../../utils': {filtered-import}
   'bluebird': Promise
   'checkit'
+  'joi'
   'prelude-ls': {empty}
+}
+
+export body = joi.object!.keys {
+  id: joi.number!.integer!.positive!.optional!
+  first-name: joi.string!.trim!.min 2 .required!
+  last-name: joi.string!.trim!.min 1 .optional!
+  assume-adult: joi.boolean!.required!
+  username: joi.string!.min 3 .max 18 .token!.required!
+  password: joi.string!.min 6 .optional!
+  password-confirm: joi.string!.min 6 .optional!.when 'password' is: joi.string!, then: joi.required!
+  email: joi.string!.email!.required!
+  gender: joi.string!.valid \male \female \nope .optional!
+  subscribed-newsletter: joi.boolean!.default false
 }
 
 export handler = ({models: {User, AuthedAction}, body, user, config, session}) ->

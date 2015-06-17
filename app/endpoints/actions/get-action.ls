@@ -1,5 +1,7 @@
+require! 'joi'
+
 export middleware = true
-export params = \key
+export params = [[\key joi.string!]]
 
 export handler = ({models: {AuthedAction}, params, log}, type) ->
   log.debug "get-action, #type, #{params.key}"
