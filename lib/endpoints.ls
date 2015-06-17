@@ -95,27 +95,54 @@ export lookup-endpoint = (name = '') ->
   unless endpoint then throw new Error "No endpoint #name"
   endpoint
 
+get-param-name = (param) ->
+  | typeof param is \string => camelize param
+  | typeof! param is \Array and param.length is 2 => camelize head param
+  | otherwise => throw new TypeError 'Param must be string or array of length 2'
+
+get-param-validator = (param) ->
+  | typeof param is \string => joi.any!.required!
+  | typeof! param is \Array and param.length = 2 => last param .required!
+  | otherwise => throw new TypeError 'Param must be string or array of length 2'
+
 create-handler-base = (endpoint) ->
-  if endpoint.use then before = create-middleware endpoint.use
+  if endpoint.use
+    [before-handler, before-endpoint] = create-middleware endpoint.use
+
+    if before-endpoint.params
+      if endpoint.params
+        names = endpoint.params.map get-param-name
+        for param in before-endpoint.params when (get-param-name param) not in names
+          endpoint.params = [param] ++ endpoint.params
+      else
+        endpoint.params = before-endpoint.params
+
+    if before-endpoint.body
+      if endpoint.body and endpoint.body.is-joi and before-endpoint.body.is-joi
+        endpoint.body .= merge before-endpoint.body
+      else if (not endpoint.body) or (endpoint.body and before-endpoint.body.is-joi)
+        endpoint.body = before-endpoint.body
+
+    if before-endpoint.options
+      if endpoint.options and endpoint.options.is-joi and before-endpoint.options.is-joi
+        endpoint.options .= merge before-endpoint.options
+      else if (not endpoint.options) or (endpoint.options and before-endpoint.options.is-joi)
+        endpoint.options = before-endpoint.options
+
   if endpoint.params
     endpoint.param-list = []
     param-validator = {}
     for param in endpoint.params
-      if typeof! param is \String
-        name = camelize param
-        param-validator[name] = joi.string!.required!
-      else if typeof! param is \Array
-        name = camelize head param
-        param-validator[name] = last param .required!
-      else throw new TypeError "Bad type for param list item: #{typeof! param} #param"
+      name = get-param-name param
       endpoint.param-list[*] = name
+      param-validator[name] = get-param-validator param
 
     endpoint.param-validator = joi.object!.keys param-validator .required!
 
   validate = endpoint.validate = get-validator endpoint
 
   (ctx, ...args) ->
-    Promise.resolve (if before then before ctx, ...args else ctx)
+    Promise.resolve (if before-handler then before-handler ctx, ...args else ctx)
       .then (ctx) -> if validate then validate ctx else ctx
       .then (ctx) ->
         endpoint.handler ctx, ...args
@@ -123,20 +150,22 @@ create-handler-base = (endpoint) ->
 export create-middleware = (spec) ->
   if typeof! spec is \String
     endpoint = lookup-endpoint spec
-    fn = create-handler-base endpoint
-    return (ctx, ...args) ->
-      fn ctx, ...args
+    handler = create-handler-base endpoint
+    fn = (ctx, ...args) ->
+      handler ctx, ...args
         .then (new-ctx = {}) -> {} <<< ctx <<< new-ctx
   else if typeof! spec is \Object
     unless keys spec .length is 1 then throw new Error "Bad middleware spec: #{JSON.stringify spec}. Object should have only one key."
-    handler = create-middleware first keys spec
+    [handler, endpoint] = create-middleware first keys spec
     extra-args = first values spec
     if typeof! extra-args isnt \Array then extra-args = [extra-args]
-    return (ctx, ...args) ->
+    fn = (ctx, ...args) ->
       args .= concat extra-args
       handler ctx, ...args
   else
     throw new Error "Unknown middleware spec: #{JSON.stringify spec}"
+
+  [fn, endpoint]
 
 export create-handler = (name) ->
   endpoint = lookup-endpoint name
