@@ -1,3 +1,10 @@
+require! 'joi'
+
+export body = joi.object!.keys {
+  username: joi.string!.trim!.required!
+  password: joi.string!.required!
+}
+
 export http-only = true
 export handler = ({errors, body, session, models: {User}}) ->
   User.find body.username

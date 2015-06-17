@@ -4,6 +4,8 @@ export body = joi.object!.keys {
   kitten: joi.string!.required!
 }
 
+export params = use: \games.levels.get
+
 export handler = ({params: {game-id, level-id}, endpoints: {games}, body, user}) ->
   games.levels.get game-id, level-id, {game: true}, {user}
     .then (level) ->

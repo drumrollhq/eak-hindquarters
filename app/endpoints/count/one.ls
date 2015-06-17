@@ -1,8 +1,9 @@
 require! {
   '../../utils': {filter-keys, parse-list}
+  'joi'
 }
 
-export params = <[id]>
+export params = [[\id joi.string!]]
 
 export handler = ({store, options: {types}, params: {id}, errors}) ->
   types = parse-list types

@@ -8,10 +8,6 @@ start = Date.now!
 packaged = new Date version-info.packaged * 1000
 host = os.hostname!
 
-export use = 'games.get'
-
-export params = [\thing]
-
 export handler = ->
   d = moment.duration Date.now! - start
   {tag, hash} = version-info

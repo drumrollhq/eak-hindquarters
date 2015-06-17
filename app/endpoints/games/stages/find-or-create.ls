@@ -12,6 +12,8 @@ export body = joi.object!.keys {
   state: joi.object!.default {}
 }
 
+export params = use: \games.get
+
 export handler = ({params: {game-id}, endpoints: {games}, models: {Stage, Level}, body, user}) ->
   find-or-create-level = (stage, level-data) ->
     Level.forge {url: level-data.url, stage-id: stage.id} .fetch!

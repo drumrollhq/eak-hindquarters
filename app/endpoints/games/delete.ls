@@ -1,3 +1,5 @@
+export params = use: \games.get
+
 export handler = ({params: {game-id}, endpoints: {games}, user}) ->
   games.get game-id, {active-stage: false}, {user}
     .then (game) ->

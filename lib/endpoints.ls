@@ -78,9 +78,11 @@ export setup = (ctx, base-path) ->
     if typeof! endpoint is \Object and endpoint.endpoint isnt false then
       endpoint.name = key
       endpoints[key] = endpoint
-      unless endpoint.middleware then set-at exports, key, create-function-handler key, ctx
-      log.debug "Registered endpoint #key"
     else delete endpoints[key]
+
+  for key, endpoint of endpoints
+    unless endpoint.middleware then set-at exports, key, create-function-handler key, ctx
+    log.debug "Registered endpoint #key"
 
   endpoints
 
@@ -113,7 +115,7 @@ create-handler-base = (endpoint) ->
       if endpoint.params
         names = endpoint.params.map get-param-name
         for param in before-endpoint.params when (get-param-name param) not in names
-          endpoint.params = [param] ++ endpoint.params
+          endpoint.params = endpoint.params.unshift param
       else
         endpoint.params = before-endpoint.params
 
@@ -128,6 +130,9 @@ create-handler-base = (endpoint) ->
         endpoint.options .= merge before-endpoint.options
       else if (not endpoint.options) or (endpoint.options and before-endpoint.options.is-joi)
         endpoint.options = before-endpoint.options
+
+  if endpoint.params and endpoint.params.use
+    endpoint.params = lookup-endpoint endpoint.params.use .params
 
   if endpoint.params
     endpoint.param-list = []

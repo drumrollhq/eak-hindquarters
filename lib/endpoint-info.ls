@@ -19,6 +19,12 @@ recursive-filter = (fn, obj) -->
 
   result
 
+schema = (sch, def = false) ->
+  if sch
+    if sch.is-joi then sch.describe! else true
+  else
+    def
+
 var routes
 export set-routes = (p) ->
   routes := {} <<< require p
@@ -29,8 +35,9 @@ export handler = ({endpoints}) ->
       typeof endpoint isnt \object or endpoint.page or endpoint.middleware or endpoint.name.0 is '_'
     |> Obj.map (endpoint) -> {
       param-list: endpoint.param-list
-      body: !!endpoint.body
-      options: !!endpoint.options
+      params: schema endpoint.param-validator, undefined
+      body: schema endpoint.body
+      options: schema endpoint.options
       http-only: endpoint.http-only
     }
 
