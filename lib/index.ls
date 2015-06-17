@@ -1,4 +1,5 @@
 require! {
+  './endpoint-info'
   './endpoints'
   './errors'
   './express'
@@ -25,6 +26,7 @@ export start = (config, root) ->
     .then -> services.setup ctx, path.join root, 'app/services'
     .then -> endpoints.setup ctx, path.join root, 'app/endpoints'
     .then -> new Promise (resolve, reject) ->
+      endpoint-info.set-routes path.join root, 'app/routes'
       router = routes.setup ctx, path.join root, 'app/routes'
       templates = require path.join root, 'app/templates'
       express-app = express router, config, log, templates

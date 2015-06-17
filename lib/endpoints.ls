@@ -71,7 +71,8 @@ get-validator = (endpoint) ->
 export setup = (ctx, base-path) ->
   {log} = ctx
   errors := ctx.errors
-  endpoints := flatten-obj walk base-path
+  endpoints := exports.endpoints = flatten-obj walk base-path
+  endpoints._info = './endpoint-info'
   for key, file of endpoints
     endpoint = require file
     if typeof! endpoint is \Object and endpoint.endpoint isnt false then
@@ -79,11 +80,17 @@ export setup = (ctx, base-path) ->
       endpoints[key] = endpoint
       unless endpoint.middleware then set-at exports, key, create-function-handler key, ctx
       log.debug "Registered endpoint #key"
+    else delete endpoints[key]
 
   endpoints
 
 export lookup-endpoint = (name = '') ->
+  if name.0 is '_'
+    us = true
+    name .= replace /^_/ ''
   name = camelize name
+  if us then name = '_' + name
+
   endpoint = endpoints[name]
   unless endpoint then throw new Error "No endpoint #name"
   endpoint
@@ -132,7 +139,7 @@ export create-middleware = (spec) ->
     throw new Error "Unknown middleware spec: #{JSON.stringify spec}"
 
 export create-handler = (name) ->
-  endpoint = {} <<< lookup-endpoint name
+  endpoint = lookup-endpoint name
 
   if endpoint.middleware then throw new Error "Cannot use middleware endpoint #name as handler"
   fn = create-handler-base endpoint
