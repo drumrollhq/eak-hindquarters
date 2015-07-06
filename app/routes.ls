@@ -1,7 +1,7 @@
 module.exports = {
-  GET: \status
   v1:
-    GET: \_info
+    GET: \status
+    hindquarters: GET: \_info
     action: verify-email: _key: GET: \actions.verify-email
     auth:
       register:
