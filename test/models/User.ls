@@ -63,6 +63,10 @@ describe 'User country & tax rate' ->
     expect user.country! .to.be.null
     expect user.set-country ip: example-gb-ip-address, card-country: \us, user-country: \ie .to.be.rejected
 
+  specify 'should convert user-country to 2-char code' ->
+    expect user.set-country card-country: \gb, user-country: 'United Kingdom'
+      .to.eventually.equal \gb
+
   context 'with an existing majority of 2' ->
     before-each ->
       user.set-country ip: example-gb-ip-address, card-country: \gb, user-country: \ie
@@ -205,7 +209,12 @@ describe 'User#subscribe-plan' ->
   after-each ->
     if user.id then user.destroy!
 
-  plan-resp = (id, options) -> Promise.resolve id: \sub_subid, plan: id: options.plan
+  period-end = (Math.round Date.now! / 1000) + 86400s
+  plan-resp = (id, options) -> Promise.resolve {
+    id: \sub_subid
+    current_period_end: period-end
+    plan: id: options.plan
+  }
 
   specify 'should find or create a stripe customer' ->
     sinon.stub user, \findOrCreateStripeCustomer, -> Promise.resolve id: \cus_someid
@@ -242,14 +251,14 @@ describe 'User#subscribe-plan' ->
     specify 'should create a subscription' ->
       sinon.stub stripe.customers, \createSubscription, (cus-id, options) ->
         expect cus-id .to.equal \cus_someid
-        expect options .to.deep.equal plan: \eak-parent-monthly
-        Promise.resolve id: \sub_subid, plan: id: options.plan
+        expect options .to.deep.equal plan: \eak-parent-monthly, tax_percent: 20
+        Promise.resolve id: \sub_subid, current_period_end: period-end, plan: id: options.plan
 
       user.subscribe-plan \eak-parent-monthly
         .tap ->
           expect stripe.customers.create-subscription .to.have.been.called-once
           stripe.customers.create-subscription.restore!
-        .should.eventually.deep.equal id: \sub_subid, plan: id: \eak-parent-monthly
+        .should.eventually.deep.equal id: \sub_subid, current_period_end: period-end, plan: id: \eak-parent-monthly
 
     specify 'should save the plan id' ->
       sinon.stub stripe.customers, \createSubscription, plan-resp
@@ -279,19 +288,19 @@ describe 'User#subscribe-plan' ->
       sinon.stub stripe.customers, \updateSubscription, (cus-id, sub-id, options) ->
         expect cus-id .to.equal \cus_someid
         expect sub-id .to.equal \sub_subid
-        expect options .to.deep.equal plan: \new-plan
-        Promise.resolve id: sub-id, plan: id: options.plan
+        expect options .to.deep.equal plan: \new-plan, tax_percent: 20
+        Promise.resolve id: sub-id, current_period_end: period-end, plan: id: options.plan
 
       user.subscribe-plan \new-plan
         .tap ->
           expect stripe.customers.update-subscription .to.have.been.called-once
           stripe.customers.update-subscription.restore!
-        .should.eventually.deep.equal id: \sub_subid, plan: id: \new-plan
+        .should.eventually.deep.equal id: \sub_subid, current_period_end: period-end, plan: id: \new-plan
 
     specify 'should save the new plan id' ->
       expect user.get \plan .to.equal \eak-parent-monthly
       sinon.stub stripe.customers, \updateSubscription, (cus-id, sub-id, options) ->
-        Promise.resolve id: sub-id, plan: id: options.plan
+        Promise.resolve id: sub-id, current_period_end: period-end, plan: id: options.plan
 
       user.subscribe-plan \new-plan
         .tap ->

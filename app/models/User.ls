@@ -1,4 +1,5 @@
 require! {
+  'country-data'
   'bcrypt'
   'bluebird': Promise
   'fs'
@@ -128,6 +129,9 @@ module.exports = (orm, db, models, BaseModel, {log, services, stripe, errors}) -
         geoip.lookup ip .country.to-lower-case!
       else @get \ipCountry
 
+      if typeof user-country is \string and user-country.length isnt 2
+        user-country = country-data.lookup.countries name: user-country .{}0.alpha2
+
       card-country ?= card-country or @get \stripeCardCountry
       user-country ?= user-country or @get \userCountry
 
@@ -168,9 +172,11 @@ module.exports = (orm, db, models, BaseModel, {log, services, stripe, errors}) -
         stripe.customers.retrieve customer-id
           .then (customer) ~>
             if customer.deleted
+              log.info 'stripe customer deleted' {customer-id, user: @id}
               @unset \stripeCustomerId
               @find-or-create-stripe-customer token
             else if token
+              log.info 'add stripe token' {customer-id, user: @id, token}
               stripe.customers.update customer.id, source: token
             else
               customer
@@ -184,23 +190,32 @@ module.exports = (orm, db, models, BaseModel, {log, services, stripe, errors}) -
             source: token
           }
           .tap (customer) ~>
+            log.info 'created stripe customer' {customer-id: customer.id, user: @id}
             @save {stripe-customer-id: customer.id}, {patch: true}
 
     subscribe-plan: (plan, token) ->
       save-plan = true
+      plan-data = plan: plan, tax_percent: @calculate-vat-rate! * 100
       @find-or-create-stripe-customer token
-        .then (customer) ->
+        .then (customer) ~>
           if customer.subscriptions?.data?.length > 0
             subscription = customer.subscriptions.data.0
             if subscription.plan.id is plan
+              log.info 'subscribe-plan: already subscribed' {user: @id, subscription: subscription.id}
               save-plan := false
               subscription
             else
-              stripe.customers.update-subscription customer.id, subscription.id, plan: plan
+              log.info 'subscribe-plan: update subscription' {user: @id, subscription: subscription.id, old-plan: subscription.plan.id, plan: plan-data}
+              stripe.customers.update-subscription customer.id, subscription.id, plan-data
           else
-            stripe.customers.create-subscription customer.id, plan: plan
+            log.info 'subscribe-plan: create subscription' {user: @id, plan: plan-data}
+            stripe.customers.create-subscription customer.id, plan-data
         .tap (subscription) ~>
-          if save-plan then @save {plan: subscription.plan.id}, patch: true
+          if save-plan
+            @save {
+              plan: subscription.plan.id
+              plan-end: new Date subscription.current_period_end * 1000
+            }, patch: true
 
     @username = -> "#{capitalize random adjectives}#{capitalize random nouns}#{Math.floor 100 * Math.random!}"
 

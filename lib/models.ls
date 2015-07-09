@@ -66,7 +66,7 @@ create-models = (orm, db, models, base-path, ctx) ->
   model-names = fs.readdir-sync base-path
     .filter ( .0 isnt '.' )
     .map ( .replace /\.[a-z]+$/, '' )
-  base = BaseModel orm, db, models
+  base = BaseModel orm, db, models, ctx.log
   for name in model-names
     model-path = path.join base-path, name
     model-logger = ctx.log.child model: name

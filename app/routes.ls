@@ -49,6 +49,7 @@ module.exports = {
         GET: \users.fetch
         exists: GET: \users.exists
         customer: GET: \users.get-customer
+        subscription: POST: \users.subscribe
 
     cards:
       POST: \cards.publish
