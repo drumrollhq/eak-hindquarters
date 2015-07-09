@@ -1,4 +1,4 @@
-export handler = ({user, session, models: {User}}) ->
+export handler = ({user, session, errors, models: {User}}) ->
   if user?
     user.fetch with-related: <[oauths]>, require: true
       .then (user) -> {logged-in: true, user: user.to-safe-json!, device: session.device-id}
