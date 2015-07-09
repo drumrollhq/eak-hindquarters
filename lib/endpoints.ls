@@ -66,7 +66,11 @@ get-validator = (endpoint) ->
   schema = joi.object!.keys schema .unknown!
 
   (ctx) ->
-    joi.validate-async ctx, schema .catch (e) -> errors.bad-request format-validator-err e
+    to-validate = ctx.{options, body, params}
+    joi
+      .validate-async to-validate, schema, endpoint.validation-options
+      .then -> ctx <<< to-validate.{options, body, params}
+      .catch (e) -> errors.bad-request format-validator-err e
 
 export setup = (ctx, base-path) ->
   {log} = ctx

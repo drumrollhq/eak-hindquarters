@@ -7,18 +7,21 @@ require! {
   'prelude-ls': {empty}
 }
 
-export body = joi.object!.keys {
+export body = joi.object!.unknown true .keys {
   id: joi.number!.integer!.positive!.optional!
   first-name: joi.string!.trim!.min 2 .required!
   last-name: joi.string!.trim!.min 1 .optional!
   assume-adult: joi.boolean!.required!
   username: joi.string!.min 3 .max 18 .token!.required!
   password: joi.string!.min 6 .optional!
-  password-confirm: joi.string!.min 6 .optional!.when 'password' is: joi.string!, then: joi.required!
+  password-confirm: joi.string!.min 6 .optional!
   email: joi.string!.email!.required!
   gender: joi.string!.valid \male \female \nope .optional!
   subscribed-newsletter: joi.boolean!.default false
+  has-password: joi.boolean!.default true
 }
+
+export validation-options = strip-unknown: true
 
 export handler = ({models: {User, AuthedAction}, body, user, config, session}) ->
   data = filtered-import body.{id, first-name, assume-adult, username, password, password-confirm, email, gender, subscribed-newsletter}
