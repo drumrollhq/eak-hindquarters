@@ -8,6 +8,9 @@ require! {
   'vatrates/vatrates'
 }
 
+NoCustomerError = (e) ->
+  e.type is \StripeInvalidRequest and e.message.match /^No such customer/
+
 Promise.promisify-all bcrypt
 
 adjectives = fs.read-file-sync "#{__dirname}/../../data/adjectives.txt" encoding: 'utf-8'
@@ -180,6 +183,10 @@ module.exports = (orm, db, models, BaseModel, {log, services, stripe, errors}) -
               stripe.customers.update customer.id, source: token
             else
               customer
+          .catch NoCustomerError, (e) ~>
+            log.info 'bad cusomter' {customer-id, user: @id}
+            @unset \stripeCustomerId
+            @find-or-create-stripe-customer token
       else
         stripe.customers
           .create {
