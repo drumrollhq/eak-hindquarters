@@ -68,8 +68,8 @@ get-validator = (endpoint) ->
   (ctx) ->
     to-validate = ctx.{options, body, params}
     joi
-      .validate-async to-validate, schema, endpoint.validation-options
-      .then -> ctx <<< to-validate.{options, body, params}
+      .validate-async to-validate, schema, (endpoint.validation-options or {})
+      .then (validated) -> ctx <<< validated
       .catch (e) -> errors.bad-request format-validator-err e
 
 export setup = (ctx, base-path) ->
