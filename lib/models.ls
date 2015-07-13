@@ -52,10 +52,8 @@ exports.setup = (ctx, model-path) ->
       assert rows.0.ping is 1
       log.info 'Ping successful!'
       db.migrate.currentVersion!
-    .then (version) -> log.info {version} "Running migrations"
-    .then -> db.migrate.latest!
     .then -> db.migrate.current-version!
-    .then (version) -> log.info {version} "Migrations completed"
+    .then (version) -> log.info {version} "db version"
     .then ->
       backend = new AclKnexBackend db, 'acl_'
       bluebird.promisify-all Acl.prototype
