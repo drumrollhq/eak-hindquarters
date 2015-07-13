@@ -18,6 +18,8 @@ ctx = {store, models, log, services, endpoints, errors, stripe, Promise}
 
 export start = (config, root) ->
   ctx.config = config
+  log.info 'Version info: ' require '../version-info.js'
+  log.info 'NODE_ENV:' config.NODE_ENV
   Promise
     .all [
       models.setup ctx, path.join root, 'app/models'
