@@ -5,7 +5,7 @@ require! {
 
 var log, model, store
 
-types = <[session kitten death edit level cutscene skip action incompatible finish page]>
+types = <[session kitten death edit level cutscene skip action incompatible finish page minigame]>
 intervals = <[minute hour day week month year]>
 
 relevant-aggregate-ids = (time) ->
