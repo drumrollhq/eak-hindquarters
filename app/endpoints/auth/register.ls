@@ -16,7 +16,7 @@ export body = joi.object!.unknown true .keys {
   password: joi.string!.min 6 .optional!
   password-confirm: joi.string!.min 6 .optional!
   email: joi.string!.email!.required!
-  gender: joi.string!.valid \male \female \nope .optional!
+  gender: joi.string!.optional!
   subscribed-newsletter: joi.boolean!.default false
   has-password: joi.boolean!.default true
 }
