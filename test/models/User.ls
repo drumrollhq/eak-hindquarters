@@ -32,6 +32,9 @@ describe 'User password' ->
   before-each ->
     user := new User new-user
 
+  after-each ->
+    user.destroy! if user.id
+
   specify 'should replace passwords with digest on save' ->
     expect user.get \password .to.equal 'glitter123'
     expect user.get \password .to.equal 'glitter123'
@@ -40,7 +43,6 @@ describe 'User password' ->
       expect user.get \password .to.not.exist
       expect user.get \passwordConfirm .to.not.exist
       expect user.get \passwordDigest .to.exist
-      user.destroy!
 
 describe 'User country & tax rate' ->
   user = null

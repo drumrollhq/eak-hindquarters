@@ -58,7 +58,7 @@ exports.setup = (ctx, model-path) ->
       backend = new AclKnexBackend db, 'acl_'
       bluebird.promisify-all Acl.prototype
       exports.acl = new Acl backend
-      create-models orm, db, exports, model-path, ctx
+      create-models orm, db, exports, model-path, ctx if model-path
 
 create-models = (orm, db, models, base-path, ctx) ->
   model-names = fs.readdir-sync base-path

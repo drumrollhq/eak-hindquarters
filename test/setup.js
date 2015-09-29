@@ -29,7 +29,7 @@ var mocha = new Mocha({
 
 glob.sync(__dirname + '/**/*.ls').forEach(mocha.addFile.bind(mocha));
 
-var db = knex({
+var tmpDB = knex({
   client: 'pg',
   connection: {
     host: config.DB_HOST,
@@ -41,7 +41,18 @@ var db = knex({
   }
 });
 
-db.raw('DROP OWNED BY ' + config.DB_USER)
+var db = null,
+  models = require('../lib/models');
+
+tmpDB.raw('DROP OWNED BY ' + config.DB_USER)
+  .then(function() {
+    var models = require('../lib/models');
+    return models.setup({config: config, log: require('../lib/log')});
+  })
+  .then(function() {
+    db = models.db;
+    return db.migrate.latest();
+  })
   .then(clearStore)
   .then(function() {
     return require('../server.js');
