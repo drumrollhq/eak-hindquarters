@@ -50,6 +50,7 @@ module.exports = {
         exists: GET: \users.exists
         customer: GET: \users.get-customer
         subscription: POST: \users.subscribe
+        eak-settings: POST: \users.update-eak-settings
 
     cards:
       POST: \cards.publish

@@ -73,7 +73,7 @@ module.exports = (orm, db, models, BaseModel, {log, services, stripe, errors}) -
 
     to-safe-json: ->
       user = @to-JSON!
-      safe = user.{id, status, username, email, first-name, last-name, gender, subscribed-newsletter, created-at, updated-at, assume-adult, verified-email}
+      safe = user.{id, status, username, email, first-name, last-name, gender, subscribed-newsletter, created-at, updated-at, assume-adult, verified-email, eak-settings}
       safe.has-password = !!user.password-digest
       safe.oauths = @related 'oauths' .to-JSON! .map (oauth) -> oauth.{provider, provider-id}
       safe.name = @name!
