@@ -7,7 +7,7 @@ id = joi.alternatives!.try joi.string!, joi.number!.integer!
 export body = joi.object!.keys {
   game: joi.object!.keys {
     id: id
-    active-stage: id.optional!
+    active-stage: joi.any!.optional!
     created-at: joi.date!.optional!
     updated-at: joi.date!.optional!
     user-id: id.optional!
