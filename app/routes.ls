@@ -59,6 +59,7 @@ module.exports = {
     games:
       mine: GET: \games.mine
       POST: \games.create
+      upload: POST: \games.upload
       _game-id:
         GET: \games.get
         PUT: \games.patch

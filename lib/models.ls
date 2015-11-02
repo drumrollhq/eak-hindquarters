@@ -69,4 +69,5 @@ create-models = (orm, db, models, base-path, ctx) ->
     model-path = path.join base-path, name
     model-logger = ctx.log.child model: name
     models[name] = (require model-path)(orm, db, models, base, {} <<< ctx <<< {log: model-logger})
+    models[name].Collection = orm.Collection.extend model: models[name]
     model-logger.debug 'Registered model'
