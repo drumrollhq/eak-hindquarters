@@ -17,6 +17,17 @@ require! {
 ctx = {store, models, log, services, endpoints, errors, stripe, Promise}
 
 export start = (config, root) ->
+  process.on \uncaughtException (err) ->
+    log.fatal \uncaughtException, err
+    # Give things a little time to log this to slack, not sure its needed but w/e
+    <- set-timeout _, 10
+    process.exit 1
+
+  process.on \unhandledRejection (err) ->
+    log.fatal \unhandledRejection, err
+    <- set-timeout _, 10
+    process.exit 1
+
   ctx.config = config
   log.info 'Version info: ' require '../version-info.js'
   log.info 'NODE_ENV:' config.NODE_ENV

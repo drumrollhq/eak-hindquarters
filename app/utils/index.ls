@@ -12,10 +12,5 @@ export parse-list = (list) ->
     .filter ( isnt '' )
 
 export filter-keys = (fn, obj) -->
-  ofn = fn
-  fn = (key) ->
-    res = ofn key
-    console.log "Check #key => #res"
-    res
   obj = {[key, value] for key, value of obj when fn key}
   obj
