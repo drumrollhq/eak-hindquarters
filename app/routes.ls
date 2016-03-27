@@ -75,4 +75,6 @@ module.exports = {
             GET: \games.levels.get
             kittens: POST: \games.levels.save-kitten
             state: PUT: \games.levels.patch-state
+    donations:
+      POST: \donations.donate
 }

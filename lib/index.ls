@@ -18,13 +18,13 @@ ctx = {store, models, log, services, endpoints, errors, stripe, Promise}
 
 export start = (config, root) ->
   process.on \uncaughtException (err) ->
-    log.fatal \uncaughtException, err
+    log.fatal \uncaughtException, err, stack: err.stack
     # Give things a little time to log this to slack, not sure its needed but w/e
     <- set-timeout _, 10
     process.exit 1
 
   process.on \unhandledRejection (err) ->
-    log.fatal \unhandledRejection, err
+    log.fatal \unhandledRejection, err, stack: err.stack
     <- set-timeout _, 10
     process.exit 1
 
