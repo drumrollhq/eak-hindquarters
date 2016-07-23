@@ -40,12 +40,12 @@ export handler = ({models: {User, AuthedAction}, body, user, config, session}) -
     .tap (user) ->
       if user.get \verifiedEmail
         # send welcome email
-        user.send-mail \eak-normal-welcome
+        user.send-mail \signup-welcome
       else
         # Send verify + welcome email
         AuthedAction.create user, \verify-email
           .then (key) ->
-            template = if user.adult! then \eak-normal-confirm-email else \eak-parent-confirm-email
+            template = if user.adult! then \signup-confirm else \signup-confirm-parent
             user.send-mail template, confirm: "#{config.APP_ROOT}/v1/action/verify-email/#{key}"
     .then (user) ->
       session.passport = user: user.id

@@ -80,12 +80,6 @@ module.exports = (orm, db, models, BaseModel, {log, services, stripe, errors}) -
       safe.country = @country!
       safe
 
-    to-mail-recipient: (type = 'to') -> {
-      email: @get 'email'
-      name: @name!
-      type: type
-    }
-
     name: ->
       {first-name, last-name, username} = @to-json!
       switch
