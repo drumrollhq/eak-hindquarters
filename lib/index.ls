@@ -12,9 +12,25 @@ require! {
   'bluebird': Promise
   'http'
   'path'
+  'repl'
 }
 
 ctx = {store, models, log, services, endpoints, errors, stripe, Promise}
+
+repl-eval = (default-eval) -> (cmd, context, filename, callback) ->
+  err, result <- default-eval.call this, cmd, context, filename
+  if err then return callback err, result
+  Promise
+    .resolve result
+    .then (res) -> callback null, res
+    .catch (err) -> callback err
+
+start-repl = (ctx) ->
+  repl-server = require 'repl'
+    .start prompt: '> ', useColors: true, terminal: true
+
+  repl-server.context <<< ctx
+  repl-server.eval = repl-eval repl-server.eval
 
 export start = (config, root) ->
   process.on \uncaughtException (err) ->
@@ -52,8 +68,7 @@ export start = (config, root) ->
       else resolve ctx
     .tap ->
       log.info "#{process.pid} listening. Go to http://localhost:#{config.PORT}/"
-      if config.REPL
-        require 'repl' .start '> ' .context <<< ctx
+      if config.REPL then start-repl ctx
     .catch (e) ->
       console.error e
       console.dir e.stack
