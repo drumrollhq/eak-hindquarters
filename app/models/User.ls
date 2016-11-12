@@ -35,10 +35,10 @@ module.exports = (orm, db, models, BaseModel, {log, services, stripe, errors}) -
 
     validations:
       full:
-        first-name: <[required]>
+        # first-name: <[required]>
         username:
-          * rule: \required
-            message: 'You\'ve got to list a username! Please?'
+          # * rule: \required
+          #   message: 'You\'ve got to list a username! Please?'
           * rule: \alphaNumeric
             message: 'Hey! Letters and numbers only in your username.'
           * rule: \unique
@@ -81,11 +81,12 @@ module.exports = (orm, db, models, BaseModel, {log, services, stripe, errors}) -
       safe
 
     name: ->
-      {first-name, last-name, username} = @to-json!
+      {first-name, last-name, username, email} = @to-json!
       switch
       | first-name and last-name => "#first-name #last-name"
       | first-name => first-name
       | username => username
+      | email => email
       | otherwise => throw new Error "Cannot get name for user #{@id}: no first-name, last-name, or username"
 
     mail-metadata: -> @to-json!.{id, username, gender}

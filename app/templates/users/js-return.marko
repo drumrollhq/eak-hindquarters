@@ -13,7 +13,8 @@
         'http://drumrollhq.com',
         'https://drumrollhq.com',
         'http://localhost:3000',
-        'http://localhost:4000'].forEach(function(origin) {
+        'http://localhost:4000',
+        'http://localhost:8000'].forEach(function(origin) {
           window.opener.postMessage(data, origin);
         });
       </script>
