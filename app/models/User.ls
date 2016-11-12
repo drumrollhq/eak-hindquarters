@@ -73,7 +73,7 @@ module.exports = (orm, db, models, BaseModel, {log, services, stripe, errors}) -
 
     to-safe-json: ->
       user = @to-JSON!
-      safe = user.{id, status, username, email, first-name, last-name, gender, subscribed-newsletter, created-at, updated-at, assume-adult, verified-email, eak-settings}
+      safe = user.{id, status, username, email, first-name, last-name, gender, subscribed-newsletter, created-at, updated-at, assume-adult, verified-email, eak-settings, purchased}
       safe.has-password = !!user.password-digest
       safe.oauths = @related 'oauths' .to-JSON! .map (oauth) -> oauth.{provider, provider-id}
       safe.name = @name!
@@ -87,7 +87,7 @@ module.exports = (orm, db, models, BaseModel, {log, services, stripe, errors}) -
       | first-name => first-name
       | username => username
       | email => email
-      | otherwise => throw new Error "Cannot get name for user #{@id}: no first-name, last-name, or username"
+      | otherwise => throw new Error "Cannot get name for user #{@id}: no first-name, last-name, username or email"
 
     mail-metadata: -> @to-json!.{id, username, gender}
 
@@ -142,6 +142,7 @@ module.exports = (orm, db, models, BaseModel, {log, services, stripe, errors}) -
 
       # save country info for later
       @save {ip-country, stripe-card-country: card-country, user-country}, patch: true
+        .then ~> @fetch!
         .then -> country
 
     country: (country-list, {include-count = false} = {}) ->
