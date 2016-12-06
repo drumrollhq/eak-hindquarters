@@ -22,7 +22,7 @@ module.exports = (router, config, log, templates) ->
   app = express!
     .use request-logger log
     .use express-promise templates
-    .use express-cors allowed-origins: ['localhost:*' '*.eraseallkittens.com' '*.drumrollhq.com']
+    .use express-cors allowed-origins: ['localhost:*' '*.eraseallkittens.com' '*.drumrollhq.com', 'eak-payment.vdtapp.com']
     .use compression!
     .use express.static __dirname + '/../public'
     .use cookie-parser!
