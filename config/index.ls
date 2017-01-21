@@ -12,9 +12,7 @@ catch e
 try
   config <<< require './credentials'
   console.log config.{NODE_ENV}
-  if config.NODE_ENV is \production
-    console.log 'production'
-    config <<< require './credentials-production'
+  config <<< require "./credentials-#{config.NODE_ENV}"
 catch e
   # meh
 
