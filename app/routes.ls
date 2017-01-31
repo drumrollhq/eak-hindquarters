@@ -52,6 +52,7 @@ module.exports = {
         subscription: POST: \users.subscribe
         eak-settings: POST: \users.update-eak-settings
         buy: POST: \users.buy
+        update: POST: \users.update
 
     cards:
       POST: \cards.publish
@@ -78,4 +79,6 @@ module.exports = {
             state: PUT: \games.levels.patch-state
     donations:
       POST: \donations.donate
+
+
 }
