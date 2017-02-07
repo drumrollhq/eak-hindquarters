@@ -4,6 +4,7 @@ if (process.env.NR_ENABLED) {
 
 require('LiveScript');
 require('babel-core/register');
+require('babel-polyfill');
 
 global.Promise = require('bluebird');
 var config = require('./config');

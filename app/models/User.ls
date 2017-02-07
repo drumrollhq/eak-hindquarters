@@ -220,6 +220,20 @@ module.exports = (orm, db, models, BaseModel, {log, services, stripe, errors}) -
               plan-end: new Date subscription.current_period_end * 1000
             }, patch: true
 
+    charge: ({ amount, description, metadata, token, ip, card-country, user-country }) ->
+      @set-country { ip, card-country, user-country }
+        .then ~> @find-or-create-stripe-customer token
+        .then (customer) ~> stripe.charges.create {
+          amount
+          currency: 'GBP'
+          description
+          statement_descriptor: description
+          metadata
+          receipt_email: @id
+          customer: customer.id
+          source: token
+        }
+
     @username = -> "#{capitalize random adjectives}#{capitalize random nouns}#{Math.floor 100 * Math.random!}"
 
     @unused-username = ->

@@ -16,6 +16,7 @@ export const body = joi.object().unknown(true).keys({
   gender: joi.string().optional(),
   subscribedNewsletter: joi.boolean().default(false),
 });
+
 export const validationOption = { stripUnknown: true };
 
 export const handler = ({ models: { User, AuthedAction }, body, user, config, session, errors }) => {

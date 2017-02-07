@@ -80,5 +80,8 @@ module.exports = {
     donations:
       POST: \donations.donate
 
-
+    gift-codes:
+      POST: \gift-codes.purchase
+      _code:
+         claim: POST: \gift-codes.claim
 }
