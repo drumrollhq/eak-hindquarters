@@ -12,5 +12,5 @@ export const validationOption = { stripUnknown: true };
 export const handler = ({ body, user }) => {
   const { status, purchased } = body;
   user.save({ purchased: purchased, status: status }, { patch: true });
-  return user.toSafeJson();
+  return user;
 };
