@@ -229,9 +229,8 @@ module.exports = (orm, db, models, BaseModel, {log, services, stripe, errors}) -
           description
           statement_descriptor: description
           metadata
-          receipt_email: @id
+          receipt_email: @get \email
           customer: customer.id
-          source: token
         }
 
     @username = -> "#{capitalize random adjectives}#{capitalize random nouns}#{Math.floor 100 * Math.random!}"
