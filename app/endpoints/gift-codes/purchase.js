@@ -22,7 +22,7 @@ export const handler = async ({ body, user, models: { GiftCode, db } }) => {
 
   await user.charge({
     amount: quantity * prices[type],
-    description: `Erase All Kittens gift × ${quantity}`,
+    description: `E.A.K. gift × ${quantity}`,
     metadata: { gift: true, buyType: type, quantity },
     token,
     ip,
